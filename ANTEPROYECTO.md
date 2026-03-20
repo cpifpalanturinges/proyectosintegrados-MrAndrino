@@ -3,7 +3,7 @@
 ## Autor
 
 David Andrino Ferrera
-GitHub: https://github.com/MrAndrino
+[GitHub](https://github.com/MrAndrino)
 
 ## Título del proyecto
 
@@ -209,3 +209,4 @@ La aplicación se desplegará en **AWS**, cumpliendo con los requisitos del mód
 ## Repositorio del proyecto
 
 El proyecto se alojará en un repositorio de GitHub con acceso para el profesorado. En él se incluirán el código fuente, el esquema E/R, la documentación del proyecto, el enlace al diseño y el resto de entregables requeridos.
+[Repositorio del proyecto](https://github.com/cpifpalanturinges/proyectosintegrados-MrAndrino/tree/main)
