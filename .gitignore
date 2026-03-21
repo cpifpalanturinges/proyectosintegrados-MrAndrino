@@ -8,6 +8,7 @@ obj/
 *.suo
 *.userosscache
 *.sln.docstates
+appsettings.Development.json
 
 # Build results
 Debug/
