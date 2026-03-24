@@ -7,6 +7,6 @@ public class Team
     public int LeaderUserId { get; set; }
 
     public User Leader { get; set; } = null!;
+    public ICollection<ParticipantProfile> Members { get; set; } = new List<ParticipantProfile>();
     public ICollection<Pick> Picks { get; set; } = new List<Pick>();
-    public ICollection<Participant> Participants { get; set; } = new List<Participant>();
 }

@@ -22,27 +22,34 @@ namespace TeamDraft.Api.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("TeamDraft.Api.Entities.Participant", b =>
+            modelBuilder.Entity("TeamDraft.Api.Entities.ParticipantProfile", b =>
                 {
-                    b.Property<int>("ParticipantId")
+                    b.Property<int>("ParticipantProfileId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ParticipantId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ParticipantProfileId"));
 
                     b.Property<int?>("AssignedTeamId")
                         .HasColumnType("int");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<bool>("IsLeader")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
 
-                    b.Property<string>("Photo")
+                    b.Property<string>("PhotoPath")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<int>("Skill1")
                         .HasColumnType("int");
@@ -56,11 +63,22 @@ namespace TeamDraft.Api.Migrations
                     b.Property<int>("Skill4")
                         .HasColumnType("int");
 
-                    b.HasKey("ParticipantId");
+                    b.Property<string>("Studies")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ParticipantProfileId");
 
                     b.HasIndex("AssignedTeamId");
 
-                    b.ToTable("Participants");
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("ParticipantProfiles");
                 });
 
             modelBuilder.Entity("TeamDraft.Api.Entities.Pick", b =>
@@ -77,7 +95,7 @@ namespace TeamDraft.Api.Migrations
                     b.Property<bool>("IsCancelled")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("ParticipantId")
+                    b.Property<int>("ParticipantProfileId")
                         .HasColumnType("int");
 
                     b.Property<int>("PickOrder")
@@ -88,7 +106,7 @@ namespace TeamDraft.Api.Migrations
 
                     b.HasKey("PickId");
 
-                    b.HasIndex("ParticipantId");
+                    b.HasIndex("ParticipantProfileId");
 
                     b.HasIndex("TeamId");
 
@@ -108,12 +126,12 @@ namespace TeamDraft.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("TeamId");
 
-                    b.HasIndex("LeaderUserId")
-                        .IsUnique();
+                    b.HasIndex("LeaderUserId");
 
                     b.ToTable("Teams");
                 });
@@ -126,45 +144,51 @@ namespace TeamDraft.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TeamDraft.Api.Entities.Participant", b =>
+            modelBuilder.Entity("TeamDraft.Api.Entities.ParticipantProfile", b =>
                 {
                     b.HasOne("TeamDraft.Api.Entities.Team", "AssignedTeam")
-                        .WithMany("Participants")
+                        .WithMany("Members")
                         .HasForeignKey("AssignedTeamId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("TeamDraft.Api.Entities.User", "User")
+                        .WithOne("ParticipantProfile")
+                        .HasForeignKey("TeamDraft.Api.Entities.ParticipantProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("AssignedTeam");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TeamDraft.Api.Entities.Pick", b =>
                 {
-                    b.HasOne("TeamDraft.Api.Entities.Participant", "Participant")
-                        .WithMany("Picks")
-                        .HasForeignKey("ParticipantId")
+                    b.HasOne("TeamDraft.Api.Entities.ParticipantProfile", "ParticipantProfile")
+                        .WithMany()
+                        .HasForeignKey("ParticipantProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -174,7 +198,7 @@ namespace TeamDraft.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Participant");
+                    b.Navigation("ParticipantProfile");
 
                     b.Navigation("Team");
                 });
@@ -182,29 +206,24 @@ namespace TeamDraft.Api.Migrations
             modelBuilder.Entity("TeamDraft.Api.Entities.Team", b =>
                 {
                     b.HasOne("TeamDraft.Api.Entities.User", "Leader")
-                        .WithOne("Team")
-                        .HasForeignKey("TeamDraft.Api.Entities.Team", "LeaderUserId")
+                        .WithMany()
+                        .HasForeignKey("LeaderUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Leader");
                 });
 
-            modelBuilder.Entity("TeamDraft.Api.Entities.Participant", b =>
-                {
-                    b.Navigation("Picks");
-                });
-
             modelBuilder.Entity("TeamDraft.Api.Entities.Team", b =>
                 {
-                    b.Navigation("Participants");
+                    b.Navigation("Members");
 
                     b.Navigation("Picks");
                 });
 
             modelBuilder.Entity("TeamDraft.Api.Entities.User", b =>
                 {
-                    b.Navigation("Team");
+                    b.Navigation("ParticipantProfile");
                 });
 #pragma warning restore 612, 618
         }
