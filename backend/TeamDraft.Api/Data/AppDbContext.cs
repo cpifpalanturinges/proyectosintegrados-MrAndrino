@@ -10,7 +10,6 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<ParticipantProfile> ParticipantProfiles { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<Pick> Picks { get; set; }
 
@@ -31,10 +30,26 @@ public class AppDbContext : DbContext
             .HasMaxLength(50);
 
         modelBuilder.Entity<User>()
-            .HasOne(u => u.ParticipantProfile)
-            .WithOne(p => p.User)
-            .HasForeignKey<ParticipantProfile>(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .Property(u => u.FirstName)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.LastName)
+            .HasMaxLength(150);
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.PhotoPath)
+            .HasMaxLength(500);
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.Studies)
+            .HasMaxLength(200);
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.AssignedTeam)
+            .WithMany(t => t.Members)
+            .HasForeignKey(u => u.AssignedTeamId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Team>()
             .HasOne(t => t.Leader)
@@ -46,28 +61,6 @@ public class AppDbContext : DbContext
             .Property(t => t.Name)
             .HasMaxLength(100);
 
-        modelBuilder.Entity<ParticipantProfile>()
-            .Property(p => p.FirstName)
-            .HasMaxLength(100);
-
-        modelBuilder.Entity<ParticipantProfile>()
-            .Property(p => p.LastName)
-            .HasMaxLength(150);
-
-        modelBuilder.Entity<ParticipantProfile>()
-            .Property(p => p.PhotoPath)
-            .HasMaxLength(500);
-
-        modelBuilder.Entity<ParticipantProfile>()
-            .Property(p => p.Studies)
-            .HasMaxLength(200);
-
-        modelBuilder.Entity<ParticipantProfile>()
-            .HasOne(p => p.AssignedTeam)
-            .WithMany(t => t.Members)
-            .HasForeignKey(p => p.AssignedTeamId)
-            .OnDelete(DeleteBehavior.SetNull);
-
         modelBuilder.Entity<Pick>()
             .HasOne(p => p.Team)
             .WithMany(t => t.Picks)
@@ -75,9 +68,9 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Pick>()
-            .HasOne(p => p.ParticipantProfile)
+            .HasOne(p => p.User)
             .WithMany()
-            .HasForeignKey(p => p.ParticipantProfileId)
+            .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

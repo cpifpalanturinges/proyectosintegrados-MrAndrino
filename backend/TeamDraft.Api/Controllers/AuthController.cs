@@ -91,7 +91,6 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
-
     [HttpPost("register")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<AuthResponseDto>> Register([FromForm] RegisterRequestDto request)
@@ -116,11 +115,6 @@ public class AuthController : ControllerBase
             return BadRequest("Password is required.");
         }
 
-        if (request.Photo is null || request.Photo.Length == 0)
-        {
-            return BadRequest("Photo is required.");
-        }
-
         var usernameExists = await _context.Users
             .AnyAsync(u => u.Username == request.Username);
 
@@ -129,15 +123,31 @@ public class AuthController : ControllerBase
             return BadRequest("Username is already taken.");
         }
 
+        if (request.IsLeader && string.IsNullOrWhiteSpace(request.TeamName))
+        {
+            return BadRequest("Team name is required for leaders.");
+        }
+
+        if (request.Photo is null || request.Photo.Length == 0)
+        {
+            return BadRequest("Photo is required.");
+        }
+
         var skills = new[] { request.Skill1, request.Skill2, request.Skill3, request.Skill4 };
+
+        if (skills.Any(skill => skill is null))
+        {
+            return BadRequest("All skills are required.");
+        }
+
         if (skills.Any(skill => skill < 1 || skill > 5))
         {
             return BadRequest("All skills must be between 1 and 5.");
         }
 
-        if (request.IsLeader && string.IsNullOrWhiteSpace(request.TeamName))
+        if (string.IsNullOrWhiteSpace(request.Studies))
         {
-            return BadRequest("Team name is required for leaders.");
+            return BadRequest("Studies are required.");
         }
 
         await using var transaction = await _context.Database.BeginTransactionAsync();
@@ -153,31 +163,7 @@ public class AuthController : ControllerBase
             var user = new User
             {
                 Username = request.Username,
-                Role = userRole
-            };
-
-            user.PasswordHash = _passwordService.HashPassword(user, request.Password);
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            Team? team = null;
-
-            if (request.IsLeader)
-            {
-                team = new Team
-                {
-                    Name = request.TeamName!,
-                    LeaderUserId = user.UserId
-                };
-
-                _context.Teams.Add(team);
-                await _context.SaveChangesAsync();
-            }
-
-            var profile = new ParticipantProfile
-            {
-                UserId = user.UserId,
+                Role = userRole,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhotoPath = photoPath,
@@ -185,13 +171,28 @@ public class AuthController : ControllerBase
                 Skill2 = request.Skill2,
                 Skill3 = request.Skill3,
                 Skill4 = request.Skill4,
-                Studies = request.Studies,
-                IsLeader = request.IsLeader,
-                AssignedTeamId = team?.TeamId
+                Studies = request.Studies
             };
 
-            _context.ParticipantProfiles.Add(profile);
+            user.PasswordHash = _passwordService.HashPassword(user, request.Password);
+
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            if (request.IsLeader)
+            {
+                var team = new Team
+                {
+                    Name = request.TeamName!,
+                    LeaderUserId = user.UserId
+                };
+
+                _context.Teams.Add(team);
+                await _context.SaveChangesAsync();
+
+                user.AssignedTeamId = team.TeamId;
+                await _context.SaveChangesAsync();
+            }
 
             await transaction.CommitAsync();
 
