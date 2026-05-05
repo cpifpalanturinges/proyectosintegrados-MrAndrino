@@ -13,3 +13,11 @@ export function getCurrentUser(token: string) {
     token,
   })
 }
+
+export function register(formData: FormData) {
+  return apiRequest<AuthResponse>('/api/auth/register', {
+    method: 'POST',
+    body: formData,
+    isFormData: true,
+  })
+}

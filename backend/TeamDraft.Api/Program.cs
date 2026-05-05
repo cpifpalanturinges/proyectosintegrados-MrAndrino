@@ -44,6 +44,16 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
 ));
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDev", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt")
 );
@@ -95,6 +105,8 @@ if (app.Environment.IsDevelopment()) {
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseCors("FrontendDev");
 
 app.UseAuthentication();
 app.UseAuthorization();

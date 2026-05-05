@@ -1,0 +1,23 @@
+:root {
+  --color-bg: #101216;
+  --color-bg-deep: #07080a;
+  --color-surface: #171a20;
+  --color-surface-soft: #20242c;
+
+  --color-text: #ebebeb;
+  --color-text-soft: rgba(235, 235, 235, 0.78);
+  --color-text-muted: rgba(235, 235, 235, 0.55);
+
+  --color-primary: #31b7db;
+  --color-primary-hover: #55c7e6;
+  --color-primary-dark: #0f6e89;
+
+  --color-dark-text: #252930;
+
+  --color-border-soft: rgba(235, 235, 235, 0.14);
+
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+
+  --shadow-soft: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+}
