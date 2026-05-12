@@ -75,10 +75,12 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await _context.Users
+            .Include(u => u.AssignedTeam)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user is null)
-        {  
+        {
             return NotFound("User not found.");
         }
 
@@ -86,11 +88,25 @@ public class AuthController : ControllerBase
         {
             UserId = user.UserId,
             Username = user.Username,
-            Role = user.Role
+            Role = user.Role,
+
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PhotoPath = user.PhotoPath,
+
+            Studies = user.Studies,
+            Skill1 = user.Skill1,
+            Skill2 = user.Skill2,
+            Skill3 = user.Skill3,
+            Skill4 = user.Skill4,
+
+            AssignedTeamId = user.AssignedTeamId,
+            AssignedTeamName = user.AssignedTeam?.Name
         };
 
         return Ok(response);
     }
+    
     [HttpPost("register")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<AuthResponseDto>> Register([FromForm] RegisterRequestDto request)

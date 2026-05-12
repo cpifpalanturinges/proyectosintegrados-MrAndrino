@@ -10,8 +10,25 @@ export function saveAuthSession(auth: AuthResponse) {
     userId: auth.userId,
     username: auth.username,
     role: auth.role,
+
+    firstName: '',
+    lastName: '',
+    photoPath: null,
+
+    studies: null,
+    skill1: null,
+    skill2: null,
+    skill3: null,
+    skill4: null,
+
+    assignedTeamId: null,
+    assignedTeamName: null,
   }
 
+  sessionStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
+export function saveStoredUser(user: CurrentUser) {
   sessionStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 

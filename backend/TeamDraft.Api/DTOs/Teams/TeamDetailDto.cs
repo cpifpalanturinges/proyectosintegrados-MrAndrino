@@ -1,4 +1,4 @@
-namespace TeamDraft.Api.DTOs.Admin;
+namespace TeamDraft.Api.DTOs.Teams;
 
 public class TeamDetailDto
 {
@@ -18,4 +18,10 @@ public class TeamUserItemDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string? PhotoPath { get; set; }
+
+    public string? Studies { get; set; }
+    public int? Skill1 { get; set; }
+    public int? Skill2 { get; set; }
+    public int? Skill3 { get; set; }
+    public int? Skill4 { get; set; }
 }

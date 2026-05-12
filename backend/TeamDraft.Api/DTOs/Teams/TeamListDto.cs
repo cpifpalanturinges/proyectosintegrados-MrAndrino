@@ -1,4 +1,4 @@
-namespace TeamDraft.Api.DTOs.Admin;
+namespace TeamDraft.Api.DTOs.Teams;
 
 public class TeamListDto
 {

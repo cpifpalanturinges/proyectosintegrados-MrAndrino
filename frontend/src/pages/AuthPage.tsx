@@ -1,8 +1,9 @@
 import { useState, type FormEvent, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login, register } from '../api/authApi'
-import { saveAuthSession } from '../utils/authStorage'
 import AuthCarousel from '../components/AuthCarousel'
+import PhotoInput from '../components/PhotoInput'
+import { getCurrentUser, login, register } from '../api/authApi'
+import { saveAuthSession, saveStoredUser } from '../utils/authStorage'
 
 type AuthMode = 'login' | 'register'
 
@@ -16,6 +17,56 @@ type RegisterField =
   | 'teamName'
 
 type RegisterFieldErrors = Partial<Record<RegisterField, string>>
+
+type RegisterFormValues = {
+  username: string
+  firstName: string
+  lastName: string
+  password: string
+  studies: string
+  photo: FormDataEntryValue | null
+  teamName: string
+}
+
+const skillOptions = ['1', '2', '3', '4', '5']
+
+function getRegisterFormValues(formData: FormData): RegisterFormValues {
+  return {
+    username: String(formData.get('username') ?? '').trim(),
+    firstName: String(formData.get('firstName') ?? '').trim(),
+    lastName: String(formData.get('lastName') ?? '').trim(),
+    password: String(formData.get('password') ?? '').trim(),
+    studies: String(formData.get('studies') ?? '').trim(),
+    photo: formData.get('photo'),
+    teamName: String(formData.get('teamName') ?? '').trim(),
+  }
+}
+
+function getBackendFieldError(message: string): RegisterField | null {
+  const normalizedMessage = message.toLowerCase()
+
+  if (
+    normalizedMessage.includes('usuario') ||
+    normalizedMessage.includes('username') ||
+    normalizedMessage.includes('user')
+  ) {
+    return 'username'
+  }
+
+  if (normalizedMessage.includes('contraseña') || normalizedMessage.includes('password')) {
+    return 'password'
+  }
+
+  if (normalizedMessage.includes('foto') || normalizedMessage.includes('photo')) {
+    return 'photo'
+  }
+
+  if (normalizedMessage.includes('equipo') || normalizedMessage.includes('team')) {
+    return 'teamName'
+  }
+
+  return null
+}
 
 function AuthPage() {
   const navigate = useNavigate()
@@ -72,13 +123,72 @@ function AuthPage() {
   }
 
   function setRegisterFieldError(fieldName: RegisterField, message: string) {
-    setRegisterFieldErrors({
-      [fieldName]: message,
-    })
-
+    setRegisterFieldErrors({ [fieldName]: message })
     setRegisterError('')
     setIsRegisterLoading(false)
     scrollToRegisterField(fieldName)
+  }
+
+  function validateRegisterForm(values: RegisterFormValues) {
+    if (!values.username) {
+      setRegisterFieldError('username', 'El usuario es obligatorio.')
+      return false
+    }
+
+    if (values.username.length < 3) {
+      setRegisterFieldError('username', 'El usuario debe tener al menos 3 caracteres.')
+      return false
+    }
+
+    if (!values.firstName) {
+      setRegisterFieldError('firstName', 'El nombre es obligatorio.')
+      return false
+    }
+
+    if (!values.lastName) {
+      setRegisterFieldError('lastName', 'Los apellidos son obligatorios.')
+      return false
+    }
+
+    if (!values.password) {
+      setRegisterFieldError('password', 'La contraseña es obligatoria.')
+      return false
+    }
+
+    if (values.password.length < 6) {
+      setRegisterFieldError('password', 'La contraseña debe tener al menos 6 caracteres.')
+      return false
+    }
+
+    if (!(values.photo instanceof File) || values.photo.size === 0) {
+      setRegisterFieldError('photo', 'La foto es obligatoria.')
+      return false
+    }
+
+    if (!values.studies) {
+      setRegisterFieldError('studies', 'Los estudios son obligatorios.')
+      return false
+    }
+
+    if (isLeader && !values.teamName) {
+      setRegisterFieldError('teamName', 'Si eres líder, debes indicar el nombre del equipo.')
+      return false
+    }
+
+    return true
+  }
+
+  function normalizeRegisterFormData(formData: FormData, values: RegisterFormValues) {
+    formData.set('username', values.username)
+    formData.set('firstName', values.firstName)
+    formData.set('lastName', values.lastName)
+    formData.set('password', values.password)
+    formData.set('studies', values.studies)
+    formData.set('isLeader', String(isLeader))
+
+    if (!isLeader) {
+      formData.delete('teamName')
+    }
   }
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
@@ -94,6 +204,10 @@ function AuthPage() {
       })
 
       saveAuthSession(authResponse)
+
+      const currentUser = await getCurrentUser(authResponse.token)
+      saveStoredUser(currentUser)
+
       navigate('/app')
     } catch (error) {
       console.error(error)
@@ -110,105 +224,46 @@ function AuthPage() {
     setRegisterFieldErrors({})
     setIsRegisterLoading(true)
 
-    const form = event.currentTarget
-    const formData = new FormData(form)
+    const formData = new FormData(event.currentTarget)
+    const values = getRegisterFormValues(formData)
 
-    const username = String(formData.get('username') ?? '').trim()
-    const firstName = String(formData.get('firstName') ?? '').trim()
-    const lastName = String(formData.get('lastName') ?? '').trim()
-    const password = String(formData.get('password') ?? '').trim()
-    const studies = String(formData.get('studies') ?? '').trim()
-    const photo = formData.get('photo')
-
-    if (!username) {
-      setRegisterFieldError('username', 'El usuario es obligatorio.')
+    if (!validateRegisterForm(values)) {
       return
     }
 
-    if (username.length < 3) {
-      setRegisterFieldError('username', 'El usuario debe tener al menos 3 caracteres.')
-      return
-    }
-
-    if (!firstName) {
-      setRegisterFieldError('firstName', 'El nombre es obligatorio.')
-      return
-    }
-
-    if (!lastName) {
-      setRegisterFieldError('lastName', 'Los apellidos son obligatorios.')
-      return
-    }
-
-    if (!password) {
-      setRegisterFieldError('password', 'La contraseña es obligatoria.')
-      return
-    }
-
-    if (password.length < 6) {
-      setRegisterFieldError('password', 'La contraseña debe tener al menos 6 caracteres.')
-      return
-    }
-
-    if (!(photo instanceof File) || photo.size === 0) {
-      setRegisterFieldError('photo', 'La foto es obligatoria.')
-      return
-    }
-
-    if (!studies) {
-      setRegisterFieldError('studies', 'Los estudios son obligatorios.')
-      return
-    }
-
-    if (isLeader) {
-      const teamName = String(formData.get('teamName') ?? '').trim()
-
-      if (!teamName) {
-        setRegisterFieldError('teamName', 'Si eres líder, debes indicar el nombre del equipo.')
-        return
-      }
-    } else {
-      formData.delete('teamName')
-    }
-
-    formData.set('username', username)
-    formData.set('firstName', firstName)
-    formData.set('lastName', lastName)
-    formData.set('password', password)
-    formData.set('studies', studies)
-    formData.set('isLeader', String(isLeader))
+    normalizeRegisterFormData(formData, values)
 
     try {
       const authResponse = await register(formData)
 
       saveAuthSession(authResponse)
+
+      const currentUser = await getCurrentUser(authResponse.token)
+      saveStoredUser(currentUser)
+
       navigate('/app')
     } catch (error) {
       console.error(error)
 
       if (error instanceof Error) {
-        const message = error.message.toLowerCase()
+        const fieldName = getBackendFieldError(error.message)
 
-        if (
-          message.includes('usuario') ||
-          message.includes('username') ||
-          message.includes('user')
-        ) {
+        if (fieldName === 'username') {
           setRegisterFieldError('username', 'Ese nombre de usuario no está disponible.')
           return
         }
 
-        if (message.includes('contraseña') || message.includes('password')) {
+        if (fieldName === 'password') {
           setRegisterFieldError('password', 'La contraseña no cumple los requisitos.')
           return
         }
 
-        if (message.includes('foto') || message.includes('photo')) {
+        if (fieldName === 'photo') {
           setRegisterFieldError('photo', 'La foto es obligatoria.')
           return
         }
 
-        if (message.includes('equipo') || message.includes('team')) {
+        if (fieldName === 'teamName') {
           setRegisterFieldError('teamName', 'Revisa el nombre del equipo.')
           return
         }
@@ -285,19 +340,15 @@ function AuthPage() {
         </section>
 
         <AuthCarousel />
-        
+
         <section
-          className={`auth-register-panel ${
-            isRegisterMode ? 'auth-register-open' : ''
-          } ${isRegisterClosing ? 'auth-register-closing' : ''}`}
+          className={`auth-register-panel ${isRegisterMode ? 'auth-register-open' : ''} ${
+            isRegisterClosing ? 'auth-register-closing' : ''
+          }`}
           onClick={stopPanelClick}
         >
           {!shouldShowRegisterContent && (
-            <button
-              type="button"
-              className="auth-switch-button"
-              onClick={openRegisterPanel}
-            >
+            <button type="button" className="auth-switch-button" onClick={openRegisterPanel}>
               <span>¿No tienes cuenta?</span>
               <strong>Registrarse</strong>
             </button>
@@ -345,10 +396,7 @@ function AuthPage() {
 
                 <label>
                   Foto
-                  <input type="file" name="photo" accept="image/*" capture="user" required />
-                  {registerFieldErrors.photo && (
-                    <span className="field-error">{registerFieldErrors.photo}</span>
-                  )}
+                  <PhotoInput error={registerFieldErrors.photo} />
                 </label>
 
                 <label>
@@ -365,49 +413,18 @@ function AuthPage() {
                 </label>
 
                 <div className="skills-grid">
-                  <label>
-                    Skill 1
-                    <select name="skill1" defaultValue="1" required>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Skill 2
-                    <select name="skill2" defaultValue="1" required>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Skill 3
-                    <select name="skill3" defaultValue="1" required>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Skill 4
-                    <select name="skill4" defaultValue="1" required>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                  </label>
+                  {[1, 2, 3, 4].map((skillNumber) => (
+                    <label key={skillNumber}>
+                      Skill {skillNumber}
+                      <select name={`skill${skillNumber}`} defaultValue="1" required>
+                        {skillOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
                 </div>
 
                 <label className="checkbox-label">
@@ -423,7 +440,7 @@ function AuthPage() {
                 {isLeader && (
                   <label>
                     Nombre del equipo
-                    <input type="text" name="teamName" placeholder="" required />
+                    <input type="text" name="teamName" placeholder="Ej: Mongers" required />
                     {registerFieldErrors.teamName && (
                       <span className="field-error">{registerFieldErrors.teamName}</span>
                     )}
@@ -441,11 +458,7 @@ function AuthPage() {
                 </button>
               </form>
 
-              <button
-                type="button"
-                className="auth-secondary-action"
-                onClick={closeRegisterPanel}
-              >
+              <button type="button" className="auth-secondary-action" onClick={closeRegisterPanel}>
                 Ya tengo cuenta, iniciar sesión
               </button>
             </div>

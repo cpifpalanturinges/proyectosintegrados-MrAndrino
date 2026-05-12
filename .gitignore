@@ -60,3 +60,6 @@ coverage/
 # =========================
 *.swp
 *.swo
+
+# Uploaded user files
+backend/TeamDraft.Api/wwwroot/uploads/

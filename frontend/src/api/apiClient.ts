@@ -124,5 +124,9 @@ export async function apiRequest<T>(
     throw new Error(friendlyMessage)
   }
 
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
