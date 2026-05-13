@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Teams;
 
@@ -45,11 +46,49 @@ public class TeamsController : ControllerBase
                 Name = t.Name,
                 LeaderUserId = t.LeaderUserId,
                 LeaderName = t.Leader.FirstName + " " + t.Leader.LastName,
-                MembersCount = t.Picks.Count(p => !p.IsCancelled)
+                MembersCount = t.Picks.Count(p => !p.IsCancelled) + 1
             })
             .ToListAsync();
 
         return Ok(teams);
+    }
+
+    [HttpGet("my")]
+    public async Task<ActionResult<TeamDetailDto>> GetMyTeam()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdClaim, out var currentUserId))
+        {
+            return Unauthorized("Invalid user session.");
+        }
+
+        var currentUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserId == currentUserId);
+
+        if (currentUser is null)
+        {
+            return Unauthorized("User not found.");
+        }
+
+        var query = _context.Teams
+            .Include(t => t.Leader)
+            .Include(t => t.Picks)
+                .ThenInclude(p => p.User)
+            .AsQueryable();
+
+        var team = currentUser.Role == "Leader"
+            ? await query.FirstOrDefaultAsync(t => t.LeaderUserId == currentUser.UserId)
+            : currentUser.AssignedTeamId is not null
+                ? await query.FirstOrDefaultAsync(t => t.TeamId == currentUser.AssignedTeamId)
+                : null;
+
+        if (team is null)
+        {
+            return NotFound("You are not assigned to a team.");
+        }
+
+        return Ok(MapTeamDetail(team));
     }
 
     [HttpGet("{teamId:int}")]
@@ -66,7 +105,12 @@ public class TeamsController : ControllerBase
             return NotFound("Team not found.");
         }
 
-        var response = new TeamDetailDto
+        return Ok(MapTeamDetail(team));
+    }
+
+    private static TeamDetailDto MapTeamDetail(Entities.Team team)
+    {
+        return new TeamDetailDto
         {
             TeamId = team.TeamId,
             Name = team.Name,
@@ -103,7 +147,5 @@ public class TeamsController : ControllerBase
                 })
                 .ToList()
         };
-
-        return Ok(response);
     }
 }

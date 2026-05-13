@@ -140,3 +140,34 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.my-team-heading {
+  margin-bottom: 1.5rem;
+}
+
+.my-team-heading h2 {
+  margin: 0.2rem 0 0.35rem;
+  font-size: clamp(2.4rem, 10vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+
+.my-team-heading p:not(.team-card-kicker) {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: clamp(1rem, 3vw, 1.15rem);
+  font-weight: 800;
+}
+
+.my-team-empty h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 8vw, 3rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.my-team-empty p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-weight: 800;
+}

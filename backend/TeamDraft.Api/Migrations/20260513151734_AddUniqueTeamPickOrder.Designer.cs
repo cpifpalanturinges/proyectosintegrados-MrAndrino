@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamDraft.Api.Data;
 
@@ -11,9 +12,11 @@ using TeamDraft.Api.Data;
 namespace TeamDraft.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260513151734_AddUniqueTeamPickOrder")]
+    partial class AddUniqueTeamPickOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,12 +78,7 @@ namespace TeamDraft.Api.Migrations
 
                     b.HasKey("TeamId");
 
-                    b.HasIndex("LeaderUserId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Teams_LeaderUserId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("LeaderUserId");
 
                     b.ToTable("Teams");
                 });
@@ -143,8 +141,6 @@ namespace TeamDraft.Api.Migrations
                     b.HasKey("UserId");
 
                     b.HasIndex("AssignedTeamId");
-
-                    b.HasIndex("Role");
 
                     b.HasIndex("Username")
                         .IsUnique();

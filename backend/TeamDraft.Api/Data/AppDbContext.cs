@@ -17,24 +17,48 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        ConfigureUsers(modelBuilder);
+        ConfigureTeams(modelBuilder);
+        ConfigurePicks(modelBuilder);
+    }
+
+    private static void ConfigureUsers(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+            .HasKey(u => u.UserId);
+
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
 
         modelBuilder.Entity<User>()
+            .HasIndex(u => u.Role);
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.AssignedTeamId);
+
+        modelBuilder.Entity<User>()
             .Property(u => u.Username)
+            .IsRequired()
             .HasMaxLength(100);
 
         modelBuilder.Entity<User>()
+            .Property(u => u.PasswordHash)
+            .IsRequired();
+
+        modelBuilder.Entity<User>()
             .Property(u => u.Role)
+            .IsRequired()
             .HasMaxLength(50);
 
         modelBuilder.Entity<User>()
             .Property(u => u.FirstName)
+            .IsRequired()
             .HasMaxLength(100);
 
         modelBuilder.Entity<User>()
             .Property(u => u.LastName)
+            .IsRequired()
             .HasMaxLength(150);
 
         modelBuilder.Entity<User>()
@@ -50,16 +74,56 @@ public class AppDbContext : DbContext
             .WithMany(t => t.Members)
             .HasForeignKey(u => u.AssignedTeamId)
             .OnDelete(DeleteBehavior.SetNull);
+    }
+
+    private static void ConfigureTeams(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Team>()
+            .HasKey(t => t.TeamId);
+
+        modelBuilder.Entity<Team>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Team>()
+            .HasIndex(t => t.LeaderUserId)
+            .HasDatabaseName("IX_Teams_LeaderUserId");
+
+        modelBuilder.Entity<Team>()
+            .HasIndex(t => t.LeaderUserId)
+            .IsUnique()
+            .HasDatabaseName("UX_Teams_LeaderUserId");
+
+        modelBuilder.Entity<Team>()
+            .Property(t => t.Name)
+            .IsRequired()
+            .HasMaxLength(100);
 
         modelBuilder.Entity<Team>()
             .HasOne(t => t.Leader)
             .WithMany()
             .HasForeignKey(t => t.LeaderUserId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
 
-        modelBuilder.Entity<Team>()
-            .Property(t => t.Name)
-            .HasMaxLength(100);
+    private static void ConfigurePicks(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Pick>()
+            .HasKey(p => p.PickId);
+
+        modelBuilder.Entity<Pick>()
+            .HasIndex(p => p.TeamId);
+
+        modelBuilder.Entity<Pick>()
+            .HasIndex(p => p.UserId);
+
+        modelBuilder.Entity<Pick>()
+            .HasIndex(p => new { p.TeamId, p.PickOrder })
+            .IsUnique();
+
+        modelBuilder.Entity<Pick>()
+            .Property(p => p.CreatedAt)
+            .IsRequired();
 
         modelBuilder.Entity<Pick>()
             .HasOne(p => p.Team)

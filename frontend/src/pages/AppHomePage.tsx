@@ -143,7 +143,9 @@ function AppHomePage() {
       <div className="app-main-scroll">
         <section key={activeTab} className={`app-content app-content-${animationDirection}`}>
           {activeTab === 'team' && (isLeader || isParticipant) && <MyTeamPage />}
-          {activeTab === 'draft' && isLeader && <DraftPage />}
+          {activeTab === 'draft' && isLeader && (
+            <DraftPage onPickCompleted={() => handleTabChange('team')} />
+          )}
           {activeTab === 'teams' && <TeamsPage />}
           {activeTab === 'users' && isAdminArea && <UsersPage />}
           {activeTab === 'system' && isAdminArea && <SystemPage />}

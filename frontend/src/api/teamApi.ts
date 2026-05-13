@@ -13,6 +13,12 @@ export function getTeams(token: string, search?: string) {
   })
 }
 
+export function getMyTeam(token: string) {
+  return apiRequest<TeamDetail>('/api/teams/my', {
+    token,
+  })
+}
+
 export function getTeamById(token: string, teamId: number) {
   return apiRequest<TeamDetail>(`/api/teams/${teamId}`, {
     token,

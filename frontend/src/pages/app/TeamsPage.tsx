@@ -255,7 +255,6 @@ function TeamsPage() {
                             <UserCard
                               key={member.userId}
                               user={member}
-                              showPickOrder
                               clickable
                               onClick={() => handleSelectTeamUser(member, 'member')}
                             />
@@ -325,7 +324,7 @@ function TeamsPage() {
                 <span className="team-card-kicker">Equipo</span>
                 <strong>{team.name}</strong>
                 <span>Líder: {team.leaderName}</span>
-                <span>{team.membersCount} miembros</span>
+                <span>{team.membersCount === 1 ? '1 miembro' : `${team.membersCount} miembros`}</span>
               </button>
             ))}
           </div>

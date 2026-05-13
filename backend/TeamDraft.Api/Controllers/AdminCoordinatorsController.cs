@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Admin;
 using TeamDraft.Api.Entities;
@@ -39,11 +40,14 @@ public class AdminCoordinatorsController : ControllerBase
 
             query = query.Where(u =>
                 u.FirstName.ToLower().Contains(s) ||
-                u.LastName.ToLower().Contains(s)
+                u.LastName.ToLower().Contains(s) ||
+                u.Username.ToLower().Contains(s)
             );
         }
 
         var coordinators = await query
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
             .Select(u => new UserListDto
             {
                 UserId = u.UserId,
@@ -63,7 +67,9 @@ public class AdminCoordinatorsController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> CreateCoordinator([FromForm] CreateCoordinatorDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Username))
+        var username = NormalizeUsername(dto.Username);
+
+        if (string.IsNullOrWhiteSpace(username))
         {
             return BadRequest("Username is required.");
         }
@@ -84,7 +90,7 @@ public class AdminCoordinatorsController : ControllerBase
         }
 
         var usernameExists = await _context.Users
-            .AnyAsync(u => u.Username == dto.Username);
+            .AnyAsync(u => u.Username == username);
 
         if (usernameExists)
         {
@@ -102,11 +108,11 @@ public class AdminCoordinatorsController : ControllerBase
 
             var user = new User
             {
-                Username = dto.Username,
+                Username = username,
                 Role = "Coordinator",
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                PhotoPath = photoPath
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+                PhotoPath = photoPath ?? "/images/default-profile.png"
             };
 
             user.PasswordHash = _passwordService.HashPassword(user, dto.Password);
@@ -115,6 +121,15 @@ public class AdminCoordinatorsController : ControllerBase
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Coordinator created successfully." });
+        }
+        catch (DbUpdateException exception) when (IsDuplicateUsernameException(exception))
+        {
+            if (!string.IsNullOrWhiteSpace(photoPath))
+            {
+                _photoService.DeletePhoto(photoPath);
+            }
+
+            return BadRequest("Username already exists.");
         }
         catch
         {
@@ -125,5 +140,16 @@ public class AdminCoordinatorsController : ControllerBase
 
             throw;
         }
+    }
+
+    private static string NormalizeUsername(string? username)
+    {
+        return username?.Trim().ToLowerInvariant() ?? string.Empty;
+    }
+
+    private static bool IsDuplicateUsernameException(DbUpdateException exception)
+    {
+        return exception.InnerException is MySqlException mysqlException &&
+               mysqlException.Number == 1062;
     }
 }

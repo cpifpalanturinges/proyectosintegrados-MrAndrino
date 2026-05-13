@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using System.Security.Claims;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Auth;
@@ -33,8 +34,10 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginRequestDto request)
     {
+        var username = NormalizeUsername(request.Username);
+
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username);
+            .FirstOrDefaultAsync(u => u.Username == username);
 
         if (user is null)
         {
@@ -106,12 +109,14 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
-    
+
     [HttpPost("register")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<AuthResponseDto>> Register([FromForm] RegisterRequestDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
+        var username = NormalizeUsername(request.Username);
+
+        if (string.IsNullOrWhiteSpace(username))
         {
             return BadRequest("Username is required.");
         }
@@ -132,7 +137,7 @@ public class AuthController : ControllerBase
         }
 
         var usernameExists = await _context.Users
-            .AnyAsync(u => u.Username == request.Username);
+            .AnyAsync(u => u.Username == username);
 
         if (usernameExists)
         {
@@ -178,16 +183,16 @@ public class AuthController : ControllerBase
 
             var user = new User
             {
-                Username = request.Username,
+                Username = username,
                 Role = userRole,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                FirstName = request.FirstName.Trim(),
+                LastName = request.LastName.Trim(),
                 PhotoPath = photoPath,
                 Skill1 = request.Skill1,
                 Skill2 = request.Skill2,
                 Skill3 = request.Skill3,
                 Skill4 = request.Skill4,
-                Studies = request.Studies
+                Studies = request.Studies.Trim()
             };
 
             user.PasswordHash = _passwordService.HashPassword(user, request.Password);
@@ -199,7 +204,7 @@ public class AuthController : ControllerBase
             {
                 var team = new Team
                 {
-                    Name = request.TeamName!,
+                    Name = request.TeamName!.Trim(),
                     LeaderUserId = user.UserId
                 };
 
@@ -224,6 +229,17 @@ public class AuthController : ControllerBase
 
             return Ok(response);
         }
+        catch (DbUpdateException exception) when (IsDuplicateUsernameException(exception))
+        {
+            await transaction.RollbackAsync();
+
+            if (!string.IsNullOrWhiteSpace(photoPath))
+            {
+                _photoService.DeletePhoto(photoPath);
+            }
+
+            return BadRequest("Username is already taken.");
+        }
         catch
         {
             await transaction.RollbackAsync();
@@ -235,5 +251,16 @@ public class AuthController : ControllerBase
 
             throw;
         }
+    }
+
+    private static string NormalizeUsername(string? username)
+    {
+        return username?.Trim().ToLowerInvariant() ?? string.Empty;
+    }
+
+    private static bool IsDuplicateUsernameException(DbUpdateException exception)
+    {
+        return exception.InnerException is MySqlException mysqlException &&
+               mysqlException.Number == 1062;
     }
 }

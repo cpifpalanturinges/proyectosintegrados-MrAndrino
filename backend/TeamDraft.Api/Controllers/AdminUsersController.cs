@@ -42,11 +42,14 @@ public class AdminUsersController : ControllerBase
 
             query = query.Where(u =>
                 u.FirstName.ToLower().Contains(s) ||
-                u.LastName.ToLower().Contains(s)
+                u.LastName.ToLower().Contains(s) ||
+                u.Username.ToLower().Contains(s)
             );
         }
 
         var users = await query
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
             .Select(u => new UserListDto
             {
                 UserId = u.UserId,
@@ -61,7 +64,7 @@ public class AdminUsersController : ControllerBase
         return Ok(users);
     }
 
-    [HttpGet("{userId}")]
+    [HttpGet("{userId:int}")]
     public async Task<ActionResult<UserDetailDto>> GetUserById(int userId)
     {
         var user = await _context.Users
@@ -104,7 +107,7 @@ public class AdminUsersController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{userId}/password")]
+    [HttpPut("{userId:int}/password")]
     public async Task<IActionResult> UpdateUserPassword(int userId, UpdateUserPasswordDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.NewPassword))
@@ -131,7 +134,7 @@ public class AdminUsersController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{userId}")]
+    [HttpPut("{userId:int}")]
     public async Task<IActionResult> UpdateUser(int userId, UpdateUserDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FirstName))
@@ -176,9 +179,9 @@ public class AdminUsersController : ControllerBase
             }
         }
 
-        user.FirstName = dto.FirstName;
-        user.LastName = dto.LastName;
-        user.Studies = dto.Studies;
+        user.FirstName = dto.FirstName.Trim();
+        user.LastName = dto.LastName.Trim();
+        user.Studies = string.IsNullOrWhiteSpace(dto.Studies) ? null : dto.Studies.Trim();
         user.Skill1 = dto.Skill1;
         user.Skill2 = dto.Skill2;
         user.Skill3 = dto.Skill3;
@@ -189,7 +192,7 @@ public class AdminUsersController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{userId}/photo")]
+    [HttpPut("{userId:int}/photo")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateUserPhoto(int userId, [FromForm] UpdateUserPhotoDto dto)
     {
@@ -210,36 +213,29 @@ public class AdminUsersController : ControllerBase
             return Forbid();
         }
 
+        var oldPhotoPath = user.PhotoPath;
         string? newPhotoPath = null;
 
         try
         {
             newPhotoPath = await _photoService.SavePhotoAsync(dto.Photo);
 
-            if (!string.IsNullOrWhiteSpace(user.PhotoPath) &&
-                user.PhotoPath != DefaultProfilePhotoPath)
-            {
-                _photoService.DeletePhoto(user.PhotoPath);
-            }
-
             user.PhotoPath = newPhotoPath;
 
             await _context.SaveChangesAsync();
+
+            DeletePhotoIfCustom(oldPhotoPath);
 
             return NoContent();
         }
         catch
         {
-            if (!string.IsNullOrWhiteSpace(newPhotoPath))
-            {
-                _photoService.DeletePhoto(newPhotoPath);
-            }
-
+            DeletePhotoIfCustom(newPhotoPath);
             throw;
         }
     }
 
-    [HttpDelete("{userId}/photo")]
+    [HttpDelete("{userId:int}/photo")]
     public async Task<IActionResult> ResetUserPhoto(int userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
@@ -254,20 +250,18 @@ public class AdminUsersController : ControllerBase
             return Forbid();
         }
 
-        if (!string.IsNullOrWhiteSpace(user.PhotoPath) &&
-            user.PhotoPath != DefaultProfilePhotoPath)
-        {
-            _photoService.DeletePhoto(user.PhotoPath);
-        }
+        var oldPhotoPath = user.PhotoPath;
 
         user.PhotoPath = DefaultProfilePhotoPath;
 
         await _context.SaveChangesAsync();
 
+        DeletePhotoIfCustom(oldPhotoPath);
+
         return NoContent();
     }
 
-    [HttpDelete("{userId}")]
+    [HttpDelete("{userId:int}")]
     public async Task<IActionResult> DeleteUser(int userId)
     {
         var currentUserId = GetCurrentUserId();
@@ -293,6 +287,8 @@ public class AdminUsersController : ControllerBase
         {
             return Forbid();
         }
+
+        var photoPathToDelete = user.PhotoPath;
 
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -335,16 +331,12 @@ public class AdminUsersController : ControllerBase
                 await _context.SaveChangesAsync();
             }
 
-            if (!string.IsNullOrWhiteSpace(user.PhotoPath) &&
-                user.PhotoPath != DefaultProfilePhotoPath)
-            {
-                _photoService.DeletePhoto(user.PhotoPath);
-            }
-
             _context.Users.Remove(user);
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            DeletePhotoIfCustom(photoPathToDelete);
 
             return NoContent();
         }
@@ -353,6 +345,21 @@ public class AdminUsersController : ControllerBase
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    private void DeletePhotoIfCustom(string? photoPath)
+    {
+        if (string.IsNullOrWhiteSpace(photoPath))
+        {
+            return;
+        }
+
+        if (photoPath == DefaultProfilePhotoPath)
+        {
+            return;
+        }
+
+        _photoService.DeletePhoto(photoPath);
     }
 
     private int? GetCurrentUserId()

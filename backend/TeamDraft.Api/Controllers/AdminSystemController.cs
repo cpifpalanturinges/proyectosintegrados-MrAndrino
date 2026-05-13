@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Admin;
 using TeamDraft.Api.Services.Interfaces;
@@ -23,36 +24,55 @@ public class AdminSystemController : ControllerBase
         _photoService = photoService;
     }
 
-    [HttpPost("picks/{pickId}/undo")]
+    [HttpPost("picks/{pickId:int}/undo")]
     public async Task<ActionResult<UndoPickResultDto>> UndoPick(int pickId)
     {
-        var pick = await _context.Picks
-            .Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.PickId == pickId);
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-        if (pick is null)
+        try
         {
-            return NotFound("Pick not found.");
+            var pick = await _context.Picks
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PickId == pickId);
+
+            if (pick is null)
+            {
+                await transaction.RollbackAsync();
+                return NotFound("Pick not found.");
+            }
+
+            if (pick.IsCancelled)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest("Pick is already cancelled.");
+            }
+
+            if (pick.User.AssignedTeamId != pick.TeamId)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest("The participant is no longer assigned to this pick team.");
+            }
+
+            pick.IsCancelled = true;
+            pick.User.AssignedTeamId = null;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            var response = new UndoPickResultDto
+            {
+                PickId = pick.PickId,
+                UserId = pick.UserId,
+                Message = "Pick undone successfully."
+            };
+
+            return Ok(response);
         }
-
-        if (pick.IsCancelled)
+        catch
         {
-            return BadRequest("Pick is already cancelled.");
+            await transaction.RollbackAsync();
+            throw;
         }
-
-        pick.IsCancelled = true;
-        pick.User.AssignedTeamId = null;
-
-        await _context.SaveChangesAsync();
-
-        var response = new UndoPickResultDto
-        {
-            PickId = pick.PickId,
-            UserId = pick.UserId,
-            Message = "Pick undone successfully."
-        };
-
-        return Ok(response);
     }
 
     [HttpPost("reset")]
@@ -73,6 +93,7 @@ public class AdminSystemController : ControllerBase
                     u.PhotoPath != DefaultProfilePhotoPath
                 )
                 .Select(u => u.PhotoPath!)
+                .Distinct()
                 .ToList();
 
             var picks = await _context.Picks.ToListAsync();
