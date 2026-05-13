@@ -1,0 +1,163 @@
+.profile-action-button,
+.profile-danger-button,
+.profile-save-button,
+.profile-cancel-button,
+.profile-photo-primary,
+.profile-photo-secondary,
+.profile-photo-danger,
+.profile-confirmation-cancel,
+.profile-confirmation-danger,
+.users-filter-button {
+  width: 100%;
+  min-width: 0;
+  padding: 0.9rem 0.55rem;
+  border-radius: var(--radius-md);
+  font-size: clamp(0.9rem, 3.4vw, 1.05rem);
+  line-height: 1.15;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.profile-action-button,
+.profile-save-button,
+.profile-photo-primary {
+  border: 0;
+  background: var(--color-primary);
+  color: var(--color-dark-text);
+}
+
+.profile-cancel-button,
+.profile-photo-secondary,
+.profile-confirmation-cancel,
+.users-filter-button {
+  border: 0.0625rem solid rgba(235, 235, 235, 0.14);
+  background: rgba(235, 235, 235, 0.06);
+  color: var(--color-text-soft);
+}
+
+.profile-danger-button,
+.profile-photo-danger,
+.profile-confirmation-danger {
+  border: 0.0625rem solid rgba(255, 120, 120, 0.35);
+  background: rgba(255, 80, 80, 0.11);
+  color: #ffb4b4;
+}
+
+.profile-action-button:hover,
+.profile-save-button:hover,
+.profile-photo-primary:hover {
+  background: var(--color-primary-hover);
+  box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
+  transform: translateY(-0.0625rem);
+}
+
+.profile-cancel-button:hover,
+.profile-photo-secondary:hover,
+.profile-confirmation-cancel:hover,
+.users-filter-button:hover {
+  background: rgba(235, 235, 235, 0.1);
+  color: var(--color-text);
+  border-color: rgba(49, 183, 219, 0.35);
+  box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
+  transform: translateY(-0.0625rem);
+}
+
+.profile-danger-button:hover:not(:disabled),
+.profile-photo-danger:hover,
+.profile-confirmation-danger:hover {
+  background: rgba(255, 80, 80, 0.18);
+  border-color: rgba(255, 120, 120, 0.6);
+  box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
+  transform: translateY(-0.0625rem);
+}
+
+.profile-action-button:active,
+.profile-danger-button:active:not(:disabled),
+.profile-save-button:active,
+.profile-cancel-button:active,
+.profile-photo-primary:active,
+.profile-photo-secondary:active,
+.profile-photo-danger:active,
+.profile-confirmation-cancel:active,
+.profile-confirmation-danger:active,
+.users-filter-button:active {
+  transform: scale(0.97);
+}
+
+.profile-action-button:disabled,
+.profile-danger-button:disabled,
+.profile-save-button:disabled,
+.profile-cancel-button:disabled,
+.profile-photo-primary:disabled,
+.profile-photo-secondary:disabled,
+.profile-photo-danger:disabled,
+.profile-confirmation-cancel:disabled,
+.profile-confirmation-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.profile-danger-button:disabled {
+  opacity: 0.42;
+}
+
+.profile-modal-close,
+.team-detail-close {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0.0625rem solid rgba(235, 235, 235, 0.14);
+  border-radius: 999rem;
+  background: rgba(235, 235, 235, 0.06);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.profile-modal-close:hover,
+.team-detail-close:hover {
+  background: rgba(235, 235, 235, 0.1);
+  border-color: rgba(49, 183, 219, 0.35);
+  box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
+  transform: translateY(-0.0625rem);
+}
+
+.profile-modal-close:active,
+.team-detail-close:active {
+  transform: scale(0.97);
+}
+
+@media (min-width: 75rem) {
+  .profile-action-button,
+  .profile-danger-button,
+  .profile-save-button,
+  .profile-cancel-button,
+  .profile-photo-primary,
+  .profile-photo-secondary,
+  .profile-photo-danger,
+  .profile-confirmation-cancel,
+  .profile-confirmation-danger {
+    font-size: 1.05rem;
+    padding: 1rem 0.7rem;
+  }
+}

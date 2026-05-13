@@ -18,4 +18,6 @@ public class UserDetailDto
 
     public int? AssignedTeamId { get; set; }
     public string? AssignedTeamName { get; set; }
+
+    public int? PickId { get; set; }
 }

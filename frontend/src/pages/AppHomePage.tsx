@@ -1,45 +1,37 @@
-import { useState, type SyntheticEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_BASE_URL } from '../api/apiConfig'
+import { getCurrentUser } from '../api/authApi'
+import UserProfileModal from '../components/UserProfileModal'
 import DraftPage from './app/DraftPage'
 import MyTeamPage from './app/MyTeamPage'
 import SystemPage from './app/SystemPage'
 import TeamsPage from './app/TeamsPage'
 import UsersPage from './app/UsersPage'
-import { clearAuthSession, getStoredUser } from '../utils/authStorage'
+import type { CurrentUser } from '../types/authTypes'
+import { clearAuthSession, getStoredUser, getToken, saveStoredUser } from '../utils/authStorage'
 import { getPhotoUrl } from '../utils/photoUrl'
+import { getRoleLabel } from '../utils/roleLabel'
 
 type AppTab = 'team' | 'draft' | 'teams' | 'users' | 'system'
 type TabAnimationDirection = 'next' | 'previous'
 
 const tabOrder: AppTab[] = ['team', 'draft', 'teams', 'users', 'system']
 
-function handleProfileImageError(event: SyntheticEvent<HTMLImageElement>) {
-  const fallbackUrl = `${API_BASE_URL}/images/default-profile.png`
-
-  if (event.currentTarget.src !== fallbackUrl) {
-    event.currentTarget.src = fallbackUrl
-  }
-}
-
 function AppHomePage() {
   const navigate = useNavigate()
-  const user = getStoredUser()
+
+  const [user, setUser] = useState<CurrentUser | null>(() => getStoredUser())
 
   const isAdminArea = user?.role === 'Admin' || user?.role === 'Coordinator'
   const isLeader = user?.role === 'Leader'
   const isParticipant = user?.role === 'Participant'
+  const canEditOwnProfile = user?.role === 'Admin' || user?.role === 'Coordinator'
 
   const initialTab: AppTab = isAdminArea ? 'teams' : 'team'
 
   const [activeTab, setActiveTab] = useState<AppTab>(initialTab)
   const [animationDirection, setAnimationDirection] = useState<TabAnimationDirection>('next')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-
-  const fullName =
-    user?.firstName || user?.lastName
-      ? `${user.firstName} ${user.lastName}`.trim()
-      : user?.username ?? 'Usuario'
 
   const displayName = user?.firstName?.trim() || user?.username || 'Usuario'
 
@@ -60,25 +52,33 @@ function AppHomePage() {
     setActiveTab(nextTab)
   }
 
+  async function refreshOwnProfile() {
+    const token = getToken()
+
+    if (!token) {
+      return
+    }
+
+    const refreshedUser = await getCurrentUser(token)
+
+    saveStoredUser(refreshedUser)
+    setUser(refreshedUser)
+  }
+
   return (
     <main className="app-page">
       <header className="app-header">
-        <button
-          type="button"
-          className="app-user-summary"
-          onClick={() => setIsProfileOpen(true)}
-        >
+        <button type="button" className="app-user-summary" onClick={() => setIsProfileOpen(true)}>
           <img
             className="app-user-photo"
             src={getPhotoUrl(user?.photoPath)}
             alt={`Foto de ${displayName}`}
-            onError={handleProfileImageError}
           />
 
           <span className="app-user-text">
             <span className="app-brand">TeamDraft</span>
             <span className="app-user-name">{displayName}</span>
-            <span className="app-role">{user?.role}</span>
+            <span className="app-role">{getRoleLabel(user?.role)}</span>
             <span className="app-profile-hint">Ver perfil</span>
           </span>
         </button>
@@ -151,102 +151,16 @@ function AppHomePage() {
       </div>
 
       {isProfileOpen && user && (
-        <div
-          className="profile-modal-backdrop"
-          role="presentation"
-          onClick={() => setIsProfileOpen(false)}
-        >
-          <section
-            className="profile-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Perfil de usuario"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="profile-modal-header">
-              <img
-                className="profile-modal-photo"
-                src={getPhotoUrl(user.photoPath)}
-                alt={`Foto de ${fullName}`}
-                onError={handleProfileImageError}
-              />
-
-              <div>
-                <p className="profile-modal-kicker">Perfil</p>
-                <h2>{fullName}</h2>
-                <p>{user.role}</p>
-              </div>
-            </div>
-
-            <div className="profile-modal-grid">
-              <div className="profile-data-item">
-                <span>Usuario</span>
-                <strong>{user.username}</strong>
-              </div>
-
-              {user.studies && (
-                <div className="profile-data-item">
-                  <span>Estudios</span>
-                  <strong>{user.studies}</strong>
-                </div>
-              )}
-
-              {user.assignedTeamName && (
-                <div className="profile-data-item">
-                  <span>Equipo</span>
-                  <strong>{user.assignedTeamName}</strong>
-                </div>
-              )}
-            </div>
-
-            {(user.skill1 !== null ||
-              user.skill2 !== null ||
-              user.skill3 !== null ||
-              user.skill4 !== null) && (
-              <div className="profile-skills">
-                <h3>Skills</h3>
-
-                <div className="profile-skills-grid">
-                  {user.skill1 !== null && (
-                    <div className="profile-skill">
-                      <span>Skill 1</span>
-                      <strong>{user.skill1}</strong>
-                    </div>
-                  )}
-
-                  {user.skill2 !== null && (
-                    <div className="profile-skill">
-                      <span>Skill 2</span>
-                      <strong>{user.skill2}</strong>
-                    </div>
-                  )}
-
-                  {user.skill3 !== null && (
-                    <div className="profile-skill">
-                      <span>Skill 3</span>
-                      <strong>{user.skill3}</strong>
-                    </div>
-                  )}
-
-                  {user.skill4 !== null && (
-                    <div className="profile-skill">
-                      <span>Skill 4</span>
-                      <strong>{user.skill4}</strong>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="profile-close-button"
-              onClick={() => setIsProfileOpen(false)}
-            >
-              Cerrar
-            </button>
-          </section>
-        </div>
+        <UserProfileModal
+          user={user}
+          title="Mi perfil"
+          canManage={canEditOwnProfile}
+          showDangerActions={false}
+          onClose={() => setIsProfileOpen(false)}
+          onUserChanged={async () => {
+            await refreshOwnProfile()
+          }}
+        />
       )}
     </main>
   )

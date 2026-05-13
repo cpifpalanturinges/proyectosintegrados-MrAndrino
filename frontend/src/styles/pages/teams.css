@@ -1,0 +1,142 @@
+.teams-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.team-card {
+  width: 100%;
+  padding: 1rem;
+  border: 0.0625rem solid rgba(235, 235, 235, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(235, 235, 235, 0.055);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-0.0625rem);
+  border-color: rgba(49, 183, 219, 0.35);
+  background: rgba(235, 235, 235, 0.08);
+  box-shadow: 0 0.75rem 1.75rem rgba(0, 0, 0, 0.2);
+}
+
+.team-card:active {
+  transform: scale(0.98);
+}
+
+.team-card-kicker {
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.team-card strong {
+  font-size: 1.35rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.team-card span:not(.team-card-kicker) {
+  color: var(--color-text-soft);
+  font-weight: 800;
+}
+
+.team-detail-panel {
+  position: relative;
+  width: min(100%, 42rem);
+}
+
+.team-detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.team-detail-header h3 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.team-detail-block {
+  margin-top: 1.25rem;
+}
+
+.team-detail-block h4 {
+  margin: 0 0 0.75rem;
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.team-members-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.team-modal-view {
+  animation-duration: 0.26s;
+  animation-timing-function: cubic-bezier(0.2, 0.85, 0.25, 1);
+  animation-fill-mode: both;
+}
+
+.team-modal-view-forward {
+  animation-name: teamViewFromRight;
+}
+
+.team-modal-view-back {
+  animation-name: teamViewFromLeft;
+}
+
+@keyframes teamViewFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes teamViewFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 48rem) {
+  .teams-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .team-members-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 75rem) {
+  .teams-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

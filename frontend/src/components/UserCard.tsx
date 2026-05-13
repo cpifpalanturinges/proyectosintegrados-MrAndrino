@@ -1,4 +1,5 @@
 import { getPhotoUrl } from '../utils/photoUrl'
+import { getRoleLabel } from '../utils/roleLabel'
 
 export type UserCardData = {
   userId: number
@@ -24,6 +25,7 @@ type UserCardProps = {
   showRole?: boolean
   showUsername?: boolean
   showTeam?: boolean
+  showSkills?: boolean
   clickable?: boolean
   onClick?: () => void
   variant?: UserCardVariant
@@ -43,6 +45,7 @@ function UserCard({
   showRole = false,
   showUsername = false,
   showTeam = false,
+  showSkills = true,
   clickable = false,
   onClick,
   variant = 'default',
@@ -60,6 +63,7 @@ function UserCard({
     'user-card',
     `user-card--${variant}`,
     clickable ? 'user-card--clickable' : '',
+    !showSkills ? 'user-card--without-skills' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -76,32 +80,34 @@ function UserCard({
 
           <div className="user-card-meta">
             {showPickOrder && user.pickOrder != null && <span>Pick #{user.pickOrder}</span>}
-            {showRole && user.role && <span>{user.role}</span>}
+            {showRole && user.role && <span>{getRoleLabel(user.role)}</span>}
             {showUsername && user.username && <span>@{user.username}</span>}
             {showTeam && user.assignedTeamName && <span>{user.assignedTeamName}</span>}
           </div>
         </div>
       </div>
 
-      <div className="user-card-skills">
-        {skills.map((skill) => {
-          const skillValue = clampSkillValue(skill.value)
-          const percentage = skillValue * 20
+      {showSkills && (
+        <div className="user-card-skills">
+          {skills.map((skill) => {
+            const skillValue = clampSkillValue(skill.value)
+            const percentage = skillValue * 20
 
-          return (
-            <div className="user-card-skill" key={skill.label}>
-              <div className="user-card-skill-header">
-                <span>{skill.label}</span>
-                <strong>{skill.value ?? '-'}</strong>
-              </div>
+            return (
+              <div className="user-card-skill" key={skill.label}>
+                <div className="user-card-skill-header">
+                  <span>{skill.label}</span>
+                  <strong>{skill.value ?? '-'}</strong>
+                </div>
 
-              <div className="user-card-skill-track">
-                <span style={{ width: `${percentage}%` }} />
+                <div className="user-card-skill-track">
+                  <span style={{ width: `${percentage}%` }} />
+                </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </>
   )
 

@@ -78,6 +78,11 @@ public class AdminUsersController : ControllerBase
             return Forbid();
         }
 
+        var activePickId = await _context.Picks
+            .Where(p => p.UserId == user.UserId && !p.IsCancelled)
+            .Select(p => (int?)p.PickId)
+            .FirstOrDefaultAsync();
+
         var response = new UserDetailDto
         {
             UserId = user.UserId,
@@ -92,7 +97,8 @@ public class AdminUsersController : ControllerBase
             Skill3 = user.Skill3,
             Skill4 = user.Skill4,
             AssignedTeamId = user.AssignedTeamId,
-            AssignedTeamName = user.AssignedTeam?.Name
+            AssignedTeamName = user.AssignedTeam?.Name,
+            PickId = activePickId
         };
 
         return Ok(response);

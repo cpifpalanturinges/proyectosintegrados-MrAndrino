@@ -440,7 +440,7 @@ function AuthPage() {
                 {isLeader && (
                   <label>
                     Nombre del equipo
-                    <input type="text" name="teamName" placeholder="Ej: Mongers" required />
+                    <input type="text" name="teamName" placeholder="" required />
                     {registerFieldErrors.teamName && (
                       <span className="field-error">{registerFieldErrors.teamName}</span>
                     )}
