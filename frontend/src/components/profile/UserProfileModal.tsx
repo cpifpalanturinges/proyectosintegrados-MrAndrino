@@ -1,37 +1,39 @@
-import { createPortal } from 'react-dom'
-import { useAnimatedModalClose } from '../hooks/useAnimatedModalClose'
-import UserProfileContent, { type UserProfileModalData } from './UserProfileContent'
+import { createPortal } from "react-dom";
+import { useAnimatedModalClose } from "../../hooks/useAnimatedModalClose";
+import UserProfileContent, {
+  type UserProfileModalData,
+} from "./UserProfileContent";
 
-export type { UserProfileModalData } from './UserProfileContent'
+export type { UserProfileModalData } from "./UserProfileContent";
 
 type UserProfileModalProps = {
-  user: UserProfileModalData
-  title?: string
-  canManage?: boolean
-  showDangerActions?: boolean
-  onClose: () => void
-  onUserChanged: (userId: number) => Promise<void>
-  onUserDeleted?: () => Promise<void> | void
-  onBack?: () => void
-  backLabel?: string
-}
+  user: UserProfileModalData;
+  title?: string;
+  canManage?: boolean;
+  showDangerActions?: boolean;
+  onClose: () => void;
+  onUserChanged: (userId: number) => Promise<void>;
+  onUserDeleted?: () => Promise<void> | void;
+  onBack?: () => void;
+  backLabel?: string;
+};
 
 function UserProfileModal({
   user,
-  title = 'Perfil de usuario',
+  title = "Perfil de usuario",
   canManage = false,
   showDangerActions = false,
   onClose,
   onUserChanged,
   onUserDeleted,
   onBack,
-  backLabel = 'Volver',
+  backLabel = "Volver",
 }: UserProfileModalProps) {
-  const { isClosing, closeWithAnimation } = useAnimatedModalClose(onClose)
+  const { isClosing, closeWithAnimation } = useAnimatedModalClose(onClose);
 
   return createPortal(
     <div
-      className={`profile-modal-backdrop ${isClosing ? 'modal-closing' : ''}`}
+      className={`profile-modal-backdrop ${isClosing ? "modal-closing" : ""}`}
       role="presentation"
       onClick={closeWithAnimation}
     >
@@ -56,7 +58,7 @@ function UserProfileModal({
       </section>
     </div>,
     document.body,
-  )
+  );
 }
 
-export default UserProfileModal
+export default UserProfileModal;

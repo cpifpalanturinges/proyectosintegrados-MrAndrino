@@ -35,16 +35,29 @@ public class PicksController : ControllerBase
 
         try
         {
+            var isDraftOpen = await _context.SystemStates
+                .Where(s => s.SystemStateId == 1)
+                .Select(s => s.IsDraftOpen)
+                .FirstOrDefaultAsync();
+
+            if (!isDraftOpen)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest("Draft is not open.");
+            }
+
             var leader = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == leaderUserId);
 
             if (leader is null)
             {
+                await transaction.RollbackAsync();
                 return NotFound("User not found.");
             }
 
             if (leader.Role != "Leader")
             {
+                await transaction.RollbackAsync();
                 return Forbid();
             }
 
@@ -54,6 +67,7 @@ public class PicksController : ControllerBase
 
             if (team is null)
             {
+                await transaction.RollbackAsync();
                 return BadRequest("Leader does not have a team.");
             }
 
@@ -62,16 +76,19 @@ public class PicksController : ControllerBase
 
             if (participant is null)
             {
+                await transaction.RollbackAsync();
                 return NotFound("Participant not found.");
             }
 
             if (participant.Role != "Participant")
             {
+                await transaction.RollbackAsync();
                 return BadRequest("Only participants can be picked.");
             }
 
             if (participant.AssignedTeamId is not null)
             {
+                await transaction.RollbackAsync();
                 return BadRequest("Participant already assigned.");
             }
 
@@ -110,6 +127,7 @@ public class PicksController : ControllerBase
 
             var response = new PickResultDto
             {
+                PickId = pick.PickId,
                 TeamId = team.TeamId,
                 TeamName = team.Name,
                 UserId = participant.UserId,

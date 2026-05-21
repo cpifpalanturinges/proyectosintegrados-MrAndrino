@@ -1,18 +1,18 @@
-type ProfileActionsMode = 'own' | 'managed'
+type ProfileActionsMode = "own" | "managed";
 
 type ProfileActionsProps = {
-  mode: ProfileActionsMode
+  mode: ProfileActionsMode;
 
-  onChangePhoto: () => void
-  onEditProfile: () => void
-  onChangePassword: () => void
+  onChangePhoto: () => void;
+  onEditProfile: () => void;
+  onChangePassword: () => void;
 
-  onRemoveFromTeam?: () => void
-  onDeleteUser?: () => void
+  onRemoveFromTeam?: () => void;
+  onDeleteUser?: () => void;
 
-  canRemoveFromTeam?: boolean
-  canDeleteUser?: boolean
-}
+  canRemoveFromTeam?: boolean;
+  canDeleteUser?: boolean;
+};
 
 function ProfileActions({
   mode,
@@ -24,20 +24,32 @@ function ProfileActions({
   canRemoveFromTeam = false,
   canDeleteUser = false,
 }: ProfileActionsProps) {
-  const isManagedProfile = mode === 'managed'
+  const isManagedProfile = mode === "managed";
 
   return (
     <div className="profile-actions">
       <div className="profile-actions-main">
-        <button type="button" className="profile-action-button" onClick={onChangePhoto}>
+        <button
+          type="button"
+          className="profile-action-button"
+          onClick={onChangePhoto}
+        >
           Cambiar imagen
         </button>
 
-        <button type="button" className="profile-action-button" onClick={onEditProfile}>
+        <button
+          type="button"
+          className="profile-action-button"
+          onClick={onEditProfile}
+        >
           Editar perfil
         </button>
 
-        <button type="button" className="profile-action-button" onClick={onChangePassword}>
+        <button
+          type="button"
+          className="profile-action-button"
+          onClick={onChangePassword}
+        >
           Cambiar contraseña
         </button>
       </div>
@@ -51,8 +63,8 @@ function ProfileActions({
             disabled={!canRemoveFromTeam}
             title={
               canRemoveFromTeam
-                ? 'Expulsar usuario del equipo'
-                : 'Este usuario no se puede expulsar del equipo'
+                ? "Expulsar usuario del equipo"
+                : "Este usuario no se puede expulsar del equipo"
             }
           >
             Expulsar del equipo
@@ -69,7 +81,7 @@ function ProfileActions({
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default ProfileActions
+export default ProfileActions;

@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<Pick> Picks { get; set; }
+    public DbSet<SystemState> SystemStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,6 +21,7 @@ public class AppDbContext : DbContext
         ConfigureUsers(modelBuilder);
         ConfigureTeams(modelBuilder);
         ConfigurePicks(modelBuilder);
+        ConfigureSystemState(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -136,5 +138,19 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    private static void ConfigureSystemState(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SystemState>()
+            .HasKey(s => s.SystemStateId);
+
+        modelBuilder.Entity<SystemState>()
+            .Property(s => s.IsDraftOpen)
+            .IsRequired();
+
+        modelBuilder.Entity<SystemState>()
+            .Property(s => s.UpdatedAt)
+            .IsRequired();
     }
 }

@@ -101,46 +101,6 @@
   animation-name: teamViewFromLeft;
 }
 
-@keyframes teamViewFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(1.5rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes teamViewFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-1.5rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@media (min-width: 48rem) {
-  .teams-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .team-members-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 75rem) {
-  .teams-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .my-team-heading {
   margin-bottom: 1.5rem;
 }
@@ -170,4 +130,48 @@
   margin: 0;
   color: var(--color-text-soft);
   font-weight: 800;
+}
+
+@keyframes teamViewFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes teamViewFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 48rem) {
+  .teams-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 75rem) {
+  .teams-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .team-detail-panel {
+    width: min(100%, 58rem);
+  }
+
+  .team-members-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

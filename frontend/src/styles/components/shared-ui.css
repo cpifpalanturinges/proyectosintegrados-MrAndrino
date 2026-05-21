@@ -2,9 +2,7 @@
 .profile-danger-button,
 .profile-save-button,
 .profile-cancel-button,
-.profile-photo-primary,
-.profile-photo-secondary,
-.profile-photo-danger,
+.profile-photo-button,
 .profile-confirmation-cancel,
 .profile-confirmation-danger,
 .users-filter-button {
@@ -27,15 +25,16 @@
 
 .profile-action-button,
 .profile-save-button,
-.profile-photo-primary {
+.profile-photo-button-primary,
+.profile-photo-button-secondary {
   border: 0;
   background: var(--color-primary);
   color: var(--color-dark-text);
 }
 
 .profile-cancel-button,
-.profile-photo-secondary,
 .profile-confirmation-cancel,
+.profile-photo-button-cancel,
 .users-filter-button {
   border: 0.0625rem solid rgba(235, 235, 235, 0.14);
   background: rgba(235, 235, 235, 0.06);
@@ -43,8 +42,8 @@
 }
 
 .profile-danger-button,
-.profile-photo-danger,
-.profile-confirmation-danger {
+.profile-confirmation-danger,
+.profile-photo-button-danger {
   border: 0.0625rem solid rgba(255, 120, 120, 0.35);
   background: rgba(255, 80, 80, 0.11);
   color: #ffb4b4;
@@ -52,15 +51,16 @@
 
 .profile-action-button:hover,
 .profile-save-button:hover,
-.profile-photo-primary:hover {
+.profile-photo-button-primary:hover,
+.profile-photo-button-secondary:hover {
   background: var(--color-primary-hover);
   box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
   transform: translateY(-0.0625rem);
 }
 
 .profile-cancel-button:hover,
-.profile-photo-secondary:hover,
 .profile-confirmation-cancel:hover,
+.profile-photo-button-cancel:hover,
 .users-filter-button:hover {
   background: rgba(235, 235, 235, 0.1);
   color: var(--color-text);
@@ -70,8 +70,8 @@
 }
 
 .profile-danger-button:hover:not(:disabled),
-.profile-photo-danger:hover,
-.profile-confirmation-danger:hover {
+.profile-confirmation-danger:hover:not(:disabled),
+.profile-photo-button-danger:hover:not(:disabled) {
   background: rgba(255, 80, 80, 0.18);
   border-color: rgba(255, 120, 120, 0.6);
   box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
@@ -82,11 +82,9 @@
 .profile-danger-button:active:not(:disabled),
 .profile-save-button:active,
 .profile-cancel-button:active,
-.profile-photo-primary:active,
-.profile-photo-secondary:active,
-.profile-photo-danger:active,
+.profile-photo-button:active,
 .profile-confirmation-cancel:active,
-.profile-confirmation-danger:active,
+.profile-confirmation-danger:active:not(:disabled),
 .users-filter-button:active {
   transform: scale(0.97);
 }
@@ -95,9 +93,8 @@
 .profile-danger-button:disabled,
 .profile-save-button:disabled,
 .profile-cancel-button:disabled,
-.profile-photo-primary:disabled,
-.profile-photo-secondary:disabled,
-.profile-photo-danger:disabled,
+.profile-photo-button:disabled,
+.profile-photo-button:has(input:disabled),
 .profile-confirmation-cancel:disabled,
 .profile-confirmation-danger:disabled {
   opacity: 0.6;
@@ -110,10 +107,22 @@
   opacity: 0.42;
 }
 
+.profile-photo-button {
+  min-height: 3rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.profile-photo-button input {
+  display: none;
+}
+
 .profile-modal-close,
 .team-detail-close {
-  width: 2.25rem;
-  height: 2.25rem;
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
   padding: 0;
   border: 0.0625rem solid rgba(235, 235, 235, 0.14);
   border-radius: 999rem;
@@ -121,7 +130,7 @@
   color: var(--color-text);
   display: grid;
   place-items: center;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   line-height: 1;
   font-weight: 900;
   cursor: pointer;
@@ -152,12 +161,10 @@
   .profile-danger-button,
   .profile-save-button,
   .profile-cancel-button,
-  .profile-photo-primary,
-  .profile-photo-secondary,
-  .profile-photo-danger,
+  .profile-photo-button,
   .profile-confirmation-cancel,
   .profile-confirmation-danger {
-    font-size: 1.05rem;
     padding: 1rem 0.7rem;
+    font-size: 1.05rem;
   }
 }

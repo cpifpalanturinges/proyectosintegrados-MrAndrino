@@ -57,6 +57,25 @@ namespace TeamDraft.Api.Migrations
                     b.ToTable("Picks");
                 });
 
+            modelBuilder.Entity("TeamDraft.Api.Entities.SystemState", b =>
+                {
+                    b.Property<int>("SystemStateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SystemStateId"));
+
+                    b.Property<bool>("IsDraftOpen")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("SystemStateId");
+
+                    b.ToTable("SystemStates");
+                });
+
             modelBuilder.Entity("TeamDraft.Api.Entities.Team", b =>
                 {
                     b.Property<int>("TeamId")

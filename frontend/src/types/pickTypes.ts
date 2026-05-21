@@ -1,14 +1,14 @@
 export type CreatePickRequest = {
-  userId: number
-}
+  userId: number;
+};
 
 export type PickResult = {
-  pickId: number
-  teamId: number
-  teamName: string
-  userId: number
-  pickOrder: number
-  firstName: string
-  lastName: string
-  photoPath: string | null
-}
+  pickId: number;
+  teamId: number;
+  teamName: string;
+  userId: number;
+  pickOrder: number;
+  firstName: string;
+  lastName: string;
+  photoPath: string | null;
+};

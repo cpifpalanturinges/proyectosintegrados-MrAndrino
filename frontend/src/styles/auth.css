@@ -1,24 +1,31 @@
 .auth-page {
   --auth-register-gradient:
-    radial-gradient(circle at top right, rgba(235, 235, 235, 0.18), transparent 18rem),
-    radial-gradient(circle at bottom left, rgba(7, 8, 10, 0.28), transparent 24rem),
+    radial-gradient(
+      circle at top right,
+      rgba(235, 235, 235, 0.18),
+      transparent 18rem
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(7, 8, 10, 0.28),
+      transparent 24rem
+    ),
     linear-gradient(180deg, #2ca9ca 0%, #2199bc 45%, #176f8a 100%);
   --auth-register-shadow:
     inset 0 0.125rem 0 rgba(37, 41, 48, 0.45),
-    inset 0 0 0 0.0625rem rgba(7, 8, 10, 0.32),
-    var(--shadow-soft);
+    inset 0 0 0 0.0625rem rgba(7, 8, 10, 0.32), var(--shadow-soft);
   --auth-register-side-shadow:
     inset 0.125rem 0 0 rgba(37, 41, 48, 0.5),
-    inset 0 0 0 0.0625rem rgba(7, 8, 10, 0.3),
-    var(--shadow-soft);
+    inset 0 0 0 0.0625rem rgba(7, 8, 10, 0.3), var(--shadow-soft);
   --auth-carousel-glass: rgba(235, 235, 235, 0.035);
 
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: clamp(1rem, 4vw, 2rem);
-  padding-bottom: 10rem;
+  padding-bottom: 9.5rem;
+  color: var(--color-text);
   display: flex;
   justify-content: center;
-  align-items: stretch;
+  align-items: flex-start;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -26,31 +33,33 @@
 .auth-shell {
   position: relative;
   width: min(100%, 29rem);
-  min-height: calc(100vh - clamp(2rem, 8vw, 4rem) - 8rem);
   display: flex;
   flex-direction: column;
 }
 
 .auth-header {
-  padding-top: clamp(1rem, 6vh, 3rem);
-  margin-bottom: 2rem;
+  padding-top: clamp(1.5rem, 7vh, 4rem);
+  margin-bottom: 1.65rem;
   transition:
     transform 0.35s ease,
     opacity 0.35s ease;
 }
 
 .auth-page-register .auth-header {
-  transform: translateY(-1rem);
+  transform: translateY(-0.85rem);
 }
 
 .auth-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.35rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: 1.15rem;
+}
+
+.auth-brand-logo {
+  display: block;
+  width: min(13.5rem, 58vw);
+  height: auto;
+  object-fit: contain;
 }
 
 .auth-brand-mark {
@@ -81,7 +90,7 @@
 .auth-divider {
   width: 3.5rem;
   height: 0.25rem;
-  margin: 1.25rem 0;
+  margin: 1.15rem 0 1.25rem;
   background: var(--color-primary);
 }
 
@@ -128,13 +137,17 @@
   gap: 0.9rem;
 }
 
+.register-form {
+  gap: 1rem;
+}
+
 .auth-form label {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   color: var(--color-text-soft);
-  font-weight: 800;
   font-size: 0.95rem;
+  font-weight: 800;
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -181,10 +194,52 @@
   border-color: var(--color-primary);
 }
 
+.register-section-title {
+  margin: 0.35rem 0 -0.15rem;
+  color: rgba(37, 41, 48, 0.72);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.register-photo-field,
+.register-leader-row,
+.register-team-field,
+.register-form-error,
+.register-submit-button {
+  grid-column: 1 / -1;
+}
+
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
+  align-items: stretch;
+}
+
+.skill-field {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  text-align: center;
+}
+
+.skill-field-label {
+  min-height: 2.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.12;
+  text-align: center;
+}
+
+.skill-field select {
+  min-height: 3.15rem;
+  width: 100%;
+  text-align: center;
 }
 
 .checkbox-label {
@@ -226,8 +281,8 @@
 
 .primary-button:hover {
   background: var(--color-primary-hover);
-  transform: translateY(-0.0625rem);
   box-shadow: 0 0.75rem 1.75rem rgba(49, 183, 219, 0.18);
+  transform: translateY(-0.0625rem);
 }
 
 .primary-button:disabled {
@@ -260,8 +315,8 @@
 }
 
 .auth-secondary-action:hover {
-  background: rgba(37, 41, 48, 0.08);
   border-radius: var(--radius-md);
+  background: rgba(37, 41, 48, 0.08);
 }
 
 .primary-button:active,
@@ -305,13 +360,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 7.5rem;
+  height: 7.35rem;
   padding: 1.25rem clamp(1rem, 4vw, 2rem);
+  overflow: hidden;
+  border-radius: 1.75rem 1.75rem 0 0;
   background: var(--auth-register-gradient);
   color: var(--color-dark-text);
-  border-radius: 1.75rem 1.75rem 0 0;
   box-shadow: var(--auth-register-shadow);
-  overflow: hidden;
   transition:
     height 0.45s ease,
     width 0.45s ease,
@@ -325,12 +380,12 @@
 
 .auth-register-open {
   height: 82vh;
-  border-radius: 1.75rem 1.75rem 0 0;
   overflow-y: auto;
+  border-radius: 1.75rem 1.75rem 0 0;
 }
 
 .auth-register-closing {
-  height: 7.5rem;
+  height: 7.35rem;
   overflow: hidden;
 }
 
@@ -345,8 +400,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.25rem;
-  cursor: pointer;
   text-align: left;
+  cursor: pointer;
 }
 
 .auth-switch-button:hover {
@@ -399,9 +454,9 @@
 
 .auth-register-content .auth-form input,
 .auth-register-content .auth-form select {
+  border-color: rgba(37, 41, 48, 0.18);
   background: rgba(235, 235, 235, 0.92);
   color: var(--color-dark-text);
-  border-color: rgba(37, 41, 48, 0.18);
 }
 
 .auth-register-content .auth-form input:hover,
@@ -448,8 +503,8 @@
 
 .photo-input-button:hover,
 .photo-input-preview-button:hover {
-  background: rgba(255, 255, 255, 0.98);
   border-color: rgba(37, 41, 48, 0.34);
+  background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 0.5rem 1.2rem rgba(7, 8, 10, 0.14);
 }
 
@@ -467,9 +522,9 @@
   flex: 0 0 auto;
   width: 3.4rem;
   height: 3.4rem;
-  object-fit: cover;
-  border-radius: 999rem;
   border: 0.125rem solid rgba(37, 41, 48, 0.24);
+  border-radius: 999rem;
+  object-fit: cover;
 }
 
 .camera-modal {
@@ -487,9 +542,9 @@
 .camera-card {
   width: min(100%, 28rem);
   padding: 1rem;
+  border: 0.0625rem solid rgba(235, 235, 235, 0.12);
   border-radius: 1.5rem;
   background: var(--color-bg);
-  border: 0.0625rem solid rgba(235, 235, 235, 0.12);
   box-shadow: var(--shadow-soft);
 }
 
@@ -502,9 +557,9 @@
 .camera-video {
   width: 100%;
   aspect-ratio: 3 / 4;
-  object-fit: cover;
   border-radius: 1rem;
   background: #000;
+  object-fit: cover;
 }
 
 .camera-actions {
@@ -524,8 +579,8 @@
 }
 
 .camera-secondary-button:hover {
-  background: rgba(235, 235, 235, 0.08);
   border-radius: var(--radius-md);
+  background: rgba(235, 235, 235, 0.08);
 }
 
 .auth-carousel {
@@ -536,9 +591,9 @@
   position: relative;
   width: 100%;
   overflow: hidden;
+  border: 0.0625rem solid rgba(235, 235, 235, 0.1);
   border-radius: 1.75rem;
   background: var(--auth-carousel-glass);
-  border: 0.0625rem solid rgba(235, 235, 235, 0.1);
   box-shadow: var(--shadow-soft);
 }
 
@@ -566,11 +621,11 @@
   position: absolute;
   left: 1.25rem;
   bottom: 1.25rem;
-  display: flex;
-  gap: 0.45rem;
   padding: 0.45rem 0.55rem;
   border-radius: 999rem;
   background: rgba(7, 8, 10, 0.46);
+  display: flex;
+  gap: 0.45rem;
   backdrop-filter: blur(0.4rem);
 }
 
@@ -591,13 +646,13 @@
 
 @keyframes authContentIn {
   from {
-    transform: translateY(1rem);
     opacity: 0;
+    transform: translateY(1rem);
   }
 
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -606,20 +661,24 @@
     align-items: center;
     justify-content: center;
     padding-inline: clamp(2rem, 6vw, 5rem);
-    padding-bottom: 11rem;
+    padding-bottom: 10rem;
   }
 
   .auth-shell {
     width: min(100%, 34rem);
-    min-height: 44rem;
   }
 
   .auth-header {
     padding-top: 0;
+    margin-bottom: 1.75rem;
+  }
+
+  .auth-brand-logo {
+    width: min(15rem, 44vw);
   }
 
   .auth-register-panel {
-    height: 8.5rem;
+    height: 8.25rem;
     padding: 1.5rem clamp(2rem, 6vw, 5rem);
   }
 
@@ -628,7 +687,7 @@
   }
 
   .auth-register-closing {
-    height: 8.5rem;
+    height: 8.25rem;
   }
 
   .auth-switch-button,
@@ -647,7 +706,20 @@
 
   .auth-shell {
     width: min(100%, 28rem);
-    min-height: 44rem;
+  }
+
+  .auth-header {
+    padding-top: 0;
+    margin-bottom: 1.65rem;
+  }
+
+  .auth-brand {
+    margin-bottom: 1rem;
+    transform: none;
+  }
+
+  .auth-brand-logo {
+    width: min(15rem, 13vw);
   }
 
   .auth-register-panel {
@@ -665,11 +737,13 @@
     transform: translateX(1rem) translateY(-50%);
   }
 
-  .auth-register-panel:not(.auth-register-open):not(.auth-register-closing):hover {
-    transform: translateX(0.4rem) translateY(-50%);
+  .auth-register-panel:not(.auth-register-open):not(
+      .auth-register-closing
+    ):hover {
     box-shadow:
       inset 0 0 0 0.0625rem rgba(37, 41, 48, 0.42),
       0 1.75rem 4rem rgba(0, 0, 0, 0.55);
+    transform: translateX(0.4rem) translateY(-50%);
   }
 
   .auth-register-open {
@@ -677,10 +751,34 @@
     width: min(40vw, 38rem);
     height: 100vh;
     padding: clamp(1.5rem, 4vw, 2.5rem);
+    overflow: hidden;
     border-radius: 2rem 0 0 2rem;
     box-shadow: var(--auth-register-side-shadow);
     transform: translateX(0) translateY(0);
-    overflow: hidden;
+  }
+
+  .auth-register-open .auth-register-content {
+    width: calc(100% - 1.4rem);
+    max-width: 34rem;
+    max-height: calc(100vh - clamp(1.5rem, 4vw, 2.5rem) * 2);
+    margin: 0 auto;
+    padding-right: 1rem;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .auth-register-open .auth-register-content::-webkit-scrollbar {
+    width: 0.45rem;
+  }
+
+  .auth-register-open .auth-register-content::-webkit-scrollbar-track {
+    border-radius: 999rem;
+    background: rgba(37, 41, 48, 0.08);
+  }
+
+  .auth-register-open .auth-register-content::-webkit-scrollbar-thumb {
+    border-radius: 999rem;
+    background: rgba(37, 41, 48, 0.32);
   }
 
   .auth-register-closing {
@@ -688,9 +786,9 @@
     width: 14rem;
     height: 8rem;
     padding: 1.25rem;
+    overflow: hidden;
     border-radius: 1.5rem 0 0 1.5rem;
     transform: translateX(1rem) translateY(-50%);
-    overflow: hidden;
   }
 
   .auth-switch-button {
@@ -699,16 +797,16 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    transform: none;
-    background: transparent;
-    border-radius: 0;
-    box-shadow: none;
     justify-content: center;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
   }
 
   .auth-switch-button:hover {
-    transform: translateY(-0.0625rem);
     box-shadow: none;
+    transform: translateY(-0.0625rem);
   }
 
   .auth-switch-button:active {
@@ -737,6 +835,7 @@
   }
 
   .auth-register-content .auth-panel-header,
+  .auth-register-content .register-section-title,
   .auth-register-content .skills-grid,
   .auth-register-content .checkbox-label,
   .auth-register-content .primary-button,
@@ -756,13 +855,15 @@
     --carousel-width: min(30vw, 30rem);
 
     position: fixed;
-    top: 60%;
-    left: calc((var(--desktop-padding) + (100vw - var(--register-open-width))) / 2);
+    top: 66%;
+    left: calc(
+      (var(--desktop-padding) + (100vw - var(--register-open-width))) / 2
+    );
+    z-index: 1;
     width: var(--carousel-width);
     display: block;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    z-index: 1;
   }
 
   .auth-page-register .auth-carousel-card {
@@ -783,23 +884,31 @@
     position: fixed;
     top: 60%;
     left: calc(
-      (var(--desktop-padding) + var(--login-width) + (100vw - var(--register-closed-width))) / 2
+      (
+          var(--desktop-padding) + var(--login-width) +
+            (100vw - var(--register-closed-width))
+        ) /
+        2
     );
+    z-index: 1;
     width: var(--carousel-width);
     display: block;
     transform: translate(-50%, -50%);
+    pointer-events: none;
     transition:
+      top 0.45s ease,
       left 0.45s ease,
       width 0.45s ease,
       opacity 0.35s ease;
-    pointer-events: none;
-    z-index: 1;
   }
 
   .auth-page-register .auth-carousel {
     --carousel-width: min(34vw, 38rem);
 
-    left: calc((var(--desktop-padding) + (100vw - var(--register-open-width))) / 2);
+    top: 66%;
+    left: calc(
+      (var(--desktop-padding) + (100vw - var(--register-open-width))) / 2
+    );
     width: var(--carousel-width);
   }
 

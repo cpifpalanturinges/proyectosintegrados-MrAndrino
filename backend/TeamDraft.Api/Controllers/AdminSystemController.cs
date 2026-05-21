@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Admin;
+using TeamDraft.Api.DTOs.System;
+using TeamDraft.Api.Entities;
 using TeamDraft.Api.Services.Interfaces;
 
 namespace TeamDraft.Api.Controllers;
@@ -22,6 +24,66 @@ public class AdminSystemController : ControllerBase
     {
         _context = context;
         _photoService = photoService;
+    }
+
+    [HttpGet("status")]
+    public async Task<ActionResult<SystemStatusDto>> GetStatus()
+    {
+        var systemState = await GetOrCreateSystemStateAsync();
+
+        return Ok(MapSystemStatus(systemState));
+    }
+
+    [HttpPost("draft/open")]
+    public async Task<ActionResult<SystemStatusDto>> OpenDraft()
+    {
+        var systemState = await GetOrCreateSystemStateAsync();
+
+        systemState.IsDraftOpen = true;
+        systemState.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(MapSystemStatus(systemState));
+    }
+
+    [HttpPost("draft/pause")]
+    public async Task<ActionResult<SystemStatusDto>> PauseDraft()
+    {
+        var systemState = await GetOrCreateSystemStateAsync();
+
+        systemState.IsDraftOpen = false;
+        systemState.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(MapSystemStatus(systemState));
+    }
+
+    [HttpGet("picks")]
+    public async Task<ActionResult<List<PickHistoryItemDto>>> GetPicksHistory()
+    {
+        var picks = await _context.Picks
+            .Include(p => p.Team)
+            .Include(p => p.User)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.PickId)
+            .Select(p => new PickHistoryItemDto
+            {
+                PickId = p.PickId,
+                TeamId = p.TeamId,
+                TeamName = p.Team.Name,
+                UserId = p.UserId,
+                FirstName = p.User.FirstName,
+                LastName = p.User.LastName,
+                PhotoPath = p.User.PhotoPath,
+                PickOrder = p.PickOrder,
+                CreatedAt = p.CreatedAt,
+                IsCancelled = p.IsCancelled
+            })
+            .ToListAsync();
+
+        return Ok(picks);
     }
 
     [HttpPost("picks/{pickId:int}/undo")]
@@ -115,6 +177,12 @@ public class AdminSystemController : ControllerBase
             _context.Users.RemoveRange(usersToDelete);
             await _context.SaveChangesAsync();
 
+            var systemState = await GetOrCreateSystemStateAsync();
+            systemState.IsDraftOpen = false;
+            systemState.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
             await transaction.CommitAsync();
 
             foreach (var photoPath in photoPathsToDelete)
@@ -129,5 +197,64 @@ public class AdminSystemController : ControllerBase
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    [HttpGet("picks/latest-active")]
+    public async Task<ActionResult<PickHistoryItemDto?>> GetLatestActivePick()
+    {
+        var latestPick = await _context.Picks
+            .Include(p => p.Team)
+            .Include(p => p.User)
+            .Where(p => !p.IsCancelled)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.PickId)
+            .Select(p => new PickHistoryItemDto
+            {
+                PickId = p.PickId,
+                TeamId = p.TeamId,
+                TeamName = p.Team.Name,
+                UserId = p.UserId,
+                FirstName = p.User.FirstName,
+                LastName = p.User.LastName,
+                PhotoPath = p.User.PhotoPath,
+                PickOrder = p.PickOrder,
+                CreatedAt = p.CreatedAt,
+                IsCancelled = p.IsCancelled
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(latestPick);
+    }
+
+    private async Task<SystemState> GetOrCreateSystemStateAsync()
+    {
+        var systemState = await _context.SystemStates
+            .FirstOrDefaultAsync(s => s.SystemStateId == 1);
+
+        if (systemState is not null)
+        {
+            return systemState;
+        }
+
+        systemState = new SystemState
+        {
+            SystemStateId = 1,
+            IsDraftOpen = false,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.SystemStates.Add(systemState);
+        await _context.SaveChangesAsync();
+
+        return systemState;
+    }
+
+    private static SystemStatusDto MapSystemStatus(SystemState systemState)
+    {
+        return new SystemStatusDto
+        {
+            IsDraftOpen = systemState.IsDraftOpen,
+            UpdatedAt = systemState.UpdatedAt
+        };
     }
 }

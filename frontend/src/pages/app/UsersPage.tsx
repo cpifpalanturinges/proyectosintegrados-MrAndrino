@@ -1,107 +1,117 @@
-import { useEffect, useMemo, useState } from 'react'
-import { getAdminUserById, getAdminUsers } from '../../api/adminUserApi'
-import UserCard from '../../components/UserCard'
-import UserProfileModal from '../../components/UserProfileModal'
+import { useEffect, useMemo, useState } from "react";
+import { getAdminUserById, getAdminUsers } from "../../api/adminUserApi";
+import UserCard from "../../components/users/UserCard";
+import UserProfileModal from "../../components/profile/UserProfileModal";
 import type {
   AdminUserDetail,
   AdminUserListItem,
   UserRoleFilter,
-} from '../../types/adminUserTypes'
-import { getToken } from '../../utils/authStorage'
+} from "../../types/adminUserTypes";
+import { getToken } from "../../utils/authStorage";
 
-function getUserFullName(user: Pick<AdminUserListItem, 'firstName' | 'lastName'>) {
-  return `${user.firstName} ${user.lastName}`.trim().toLocaleLowerCase('es')
+function getUserFullName(
+  user: Pick<AdminUserListItem, "firstName" | "lastName">,
+) {
+  return `${user.firstName} ${user.lastName}`.trim().toLocaleLowerCase("es");
 }
 
 function UsersPage() {
-  const token = getToken()
+  const token = getToken();
 
-  const [users, setUsers] = useState<AdminUserListItem[]>([])
-  const [selectedUser, setSelectedUser] = useState<AdminUserDetail | null>(null)
+  const [users, setUsers] = useState<AdminUserListItem[]>([]);
+  const [selectedUser, setSelectedUser] = useState<AdminUserDetail | null>(
+    null,
+  );
 
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<UserRoleFilter>('all')
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<UserRoleFilter>("all");
 
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
-  const [error, setError] = useState('')
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [error, setError] = useState("");
 
   const filteredUsers = useMemo(() => {
     const usersByRole =
-      roleFilter === 'all' ? users : users.filter((user) => user.role === roleFilter)
+      roleFilter === "all"
+        ? users
+        : users.filter((user) => user.role === roleFilter);
 
     return [...usersByRole].sort((firstUser, secondUser) =>
-      getUserFullName(firstUser).localeCompare(getUserFullName(secondUser), 'es', {
-        sensitivity: 'base',
-      }),
-    )
-  }, [users, roleFilter])
+      getUserFullName(firstUser).localeCompare(
+        getUserFullName(secondUser),
+        "es",
+        {
+          sensitivity: "base",
+        },
+      ),
+    );
+  }, [users, roleFilter]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      loadUsers(search)
-    }, 300)
+      loadUsers(search);
+    }, 300);
 
     return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [search])
+      window.clearTimeout(timeoutId);
+    };
+  }, [search]);
 
   async function loadUsers(searchValue: string) {
     if (!token) {
-      setError('Sesión no válida.')
-      setIsLoadingUsers(false)
-      return
+      setError("Sesión no válida.");
+      setIsLoadingUsers(false);
+      return;
     }
 
-    setError('')
-    setIsLoadingUsers(true)
+    setError("");
+    setIsLoadingUsers(true);
 
     try {
-      const data = await getAdminUsers(token, searchValue)
-      setUsers(data)
+      const data = await getAdminUsers(token, searchValue);
+      setUsers(data);
     } catch (apiError) {
-      console.error(apiError)
-      setError('No se han podido cargar los usuarios.')
+      console.error(apiError);
+      setError("No se han podido cargar los usuarios.");
     } finally {
-      setIsLoadingUsers(false)
+      setIsLoadingUsers(false);
     }
   }
 
   async function handleSelectUser(userId: number) {
     if (!token) {
-      setError('Sesión no válida.')
-      return
+      setError("Sesión no válida.");
+      return;
     }
 
-    setError('')
+    setError("");
 
     try {
-      const data = await getAdminUserById(userId, token)
-      setSelectedUser(data)
+      const data = await getAdminUserById(userId, token);
+      setSelectedUser(data);
     } catch (apiError) {
-      console.error(apiError)
-      setError('No se ha podido cargar el perfil del usuario.')
+      console.error(apiError);
+      setError("No se ha podido cargar el perfil del usuario.");
     }
   }
 
   async function refreshSelectedUser(userId: number) {
     if (!token) {
-      setError('Sesión no válida.')
-      return
+      setError("Sesión no válida.");
+      return;
     }
 
     const [updatedUser, updatedUsers] = await Promise.all([
       getAdminUserById(userId, token),
       getAdminUsers(token, search),
-    ])
+    ]);
 
-    setSelectedUser(updatedUser)
-    setUsers(updatedUsers)
+    setSelectedUser(updatedUser);
+    setUsers(updatedUsers);
   }
 
   async function handleUserDeleted() {
-    await loadUsers(search)
-    setSelectedUser(null)
+    await loadUsers(search);
+    setSelectedUser(null);
   }
 
   return (
@@ -129,9 +139,9 @@ function UsersPage() {
             <button
               type="button"
               className={`users-filter-button ${
-                roleFilter === 'all' ? 'users-filter-button-active' : ''
+                roleFilter === "all" ? "users-filter-button-active" : ""
               }`}
-              onClick={() => setRoleFilter('all')}
+              onClick={() => setRoleFilter("all")}
             >
               Todos
             </button>
@@ -139,9 +149,9 @@ function UsersPage() {
             <button
               type="button"
               className={`users-filter-button ${
-                roleFilter === 'Leader' ? 'users-filter-button-active' : ''
+                roleFilter === "Leader" ? "users-filter-button-active" : ""
               }`}
-              onClick={() => setRoleFilter('Leader')}
+              onClick={() => setRoleFilter("Leader")}
             >
               Líderes
             </button>
@@ -149,9 +159,9 @@ function UsersPage() {
             <button
               type="button"
               className={`users-filter-button ${
-                roleFilter === 'Participant' ? 'users-filter-button-active' : ''
+                roleFilter === "Participant" ? "users-filter-button-active" : ""
               }`}
-              onClick={() => setRoleFilter('Participant')}
+              onClick={() => setRoleFilter("Participant")}
             >
               Participantes
             </button>
@@ -163,7 +173,9 @@ function UsersPage() {
         {isLoadingUsers ? (
           <p className="app-muted">Cargando usuarios...</p>
         ) : filteredUsers.length === 0 ? (
-          <p className="app-muted">No hay usuarios que coincidan con la búsqueda.</p>
+          <p className="app-muted">
+            No hay usuarios que coincidan con la búsqueda.
+          </p>
         ) : (
           <div className="users-grid">
             {filteredUsers.map((user) => (
@@ -192,7 +204,7 @@ function UsersPage() {
         />
       )}
     </>
-  )
+  );
 }
 
-export default UsersPage
+export default UsersPage;

@@ -1,74 +1,85 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getCurrentUser } from '../api/authApi'
-import UserProfileModal from '../components/UserProfileModal'
-import DraftPage from './app/DraftPage'
-import MyTeamPage from './app/MyTeamPage'
-import SystemPage from './app/SystemPage'
-import TeamsPage from './app/TeamsPage'
-import UsersPage from './app/UsersPage'
-import type { CurrentUser } from '../types/authTypes'
-import { clearAuthSession, getStoredUser, getToken, saveStoredUser } from '../utils/authStorage'
-import { getPhotoUrl } from '../utils/photoUrl'
-import { getRoleLabel } from '../utils/roleLabel'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../api/authApi";
+import UserProfileModal from "../components/profile/UserProfileModal";
+import DraftPage from "./app/DraftPage";
+import MyTeamPage from "./app/MyTeamPage";
+import SystemPage from "./app/SystemPage";
+import TeamsPage from "./app/TeamsPage";
+import UsersPage from "./app/UsersPage";
+import type { CurrentUser } from "../types/authTypes";
+import {
+  clearAuthSession,
+  getStoredUser,
+  getToken,
+  saveStoredUser,
+} from "../utils/authStorage";
+import { getPhotoUrl } from "../utils/photoUrl";
+import { getRoleLabel } from "../utils/roleLabel";
 
-type AppTab = 'team' | 'draft' | 'teams' | 'users' | 'system'
-type TabAnimationDirection = 'next' | 'previous'
+type AppTab = "team" | "draft" | "teams" | "users" | "system";
+type TabAnimationDirection = "next" | "previous";
 
-const tabOrder: AppTab[] = ['team', 'draft', 'teams', 'users', 'system']
+const tabOrder: AppTab[] = ["team", "draft", "teams", "users", "system"];
 
 function AppHomePage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [user, setUser] = useState<CurrentUser | null>(() => getStoredUser())
+  const [user, setUser] = useState<CurrentUser | null>(() => getStoredUser());
 
-  const isAdminArea = user?.role === 'Admin' || user?.role === 'Coordinator'
-  const isLeader = user?.role === 'Leader'
-  const isParticipant = user?.role === 'Participant'
-  const canEditOwnProfile = user?.role === 'Admin' || user?.role === 'Coordinator'
+  const isAdminArea = user?.role === "Admin" || user?.role === "Coordinator";
+  const isLeader = user?.role === "Leader";
+  const isParticipant = user?.role === "Participant";
+  const canEditOwnProfile =
+    user?.role === "Admin" || user?.role === "Coordinator";
 
-  const initialTab: AppTab = isAdminArea ? 'teams' : 'team'
+  const initialTab: AppTab = isAdminArea ? "teams" : "team";
 
-  const [activeTab, setActiveTab] = useState<AppTab>(initialTab)
-  const [animationDirection, setAnimationDirection] = useState<TabAnimationDirection>('next')
-  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<AppTab>(initialTab);
+  const [animationDirection, setAnimationDirection] =
+    useState<TabAnimationDirection>("next");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const displayName = user?.firstName?.trim() || user?.username || 'Usuario'
+  const displayName = user?.firstName?.trim() || user?.username || "Usuario";
 
   function handleLogout() {
-    clearAuthSession()
-    navigate('/auth')
+    clearAuthSession();
+    navigate("/auth");
   }
 
   function handleTabChange(nextTab: AppTab) {
     if (nextTab === activeTab) {
-      return
+      return;
     }
 
-    const currentIndex = tabOrder.indexOf(activeTab)
-    const nextIndex = tabOrder.indexOf(nextTab)
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const nextIndex = tabOrder.indexOf(nextTab);
 
-    setAnimationDirection(nextIndex > currentIndex ? 'next' : 'previous')
-    setActiveTab(nextTab)
+    setAnimationDirection(nextIndex > currentIndex ? "next" : "previous");
+    setActiveTab(nextTab);
   }
 
   async function refreshOwnProfile() {
-    const token = getToken()
+    const token = getToken();
 
     if (!token) {
-      return
+      return;
     }
 
-    const refreshedUser = await getCurrentUser(token)
+    const refreshedUser = await getCurrentUser(token);
 
-    saveStoredUser(refreshedUser)
-    setUser(refreshedUser)
+    saveStoredUser(refreshedUser);
+    setUser(refreshedUser);
   }
 
   return (
     <main className="app-page">
       <header className="app-header">
-        <button type="button" className="app-user-summary" onClick={() => setIsProfileOpen(true)}>
+        <button
+          type="button"
+          className="app-user-summary"
+          onClick={() => setIsProfileOpen(true)}
+        >
           <img
             className="app-user-photo"
             src={getPhotoUrl(user?.photoPath)}
@@ -83,7 +94,11 @@ function AppHomePage() {
           </span>
         </button>
 
-        <button type="button" className="app-logout-button" onClick={handleLogout}>
+        <button
+          type="button"
+          className="app-logout-button"
+          onClick={handleLogout}
+        >
           Cerrar sesión
         </button>
       </header>
@@ -92,8 +107,8 @@ function AppHomePage() {
         {(isLeader || isParticipant) && (
           <button
             type="button"
-            className={`app-tab ${activeTab === 'team' ? 'app-tab-active' : ''}`}
-            onClick={() => handleTabChange('team')}
+            className={`app-tab ${activeTab === "team" ? "app-tab-active" : ""}`}
+            onClick={() => handleTabChange("team")}
           >
             Mi equipo
           </button>
@@ -102,8 +117,8 @@ function AppHomePage() {
         {isLeader && (
           <button
             type="button"
-            className={`app-tab ${activeTab === 'draft' ? 'app-tab-active' : ''}`}
-            onClick={() => handleTabChange('draft')}
+            className={`app-tab ${activeTab === "draft" ? "app-tab-active" : ""}`}
+            onClick={() => handleTabChange("draft")}
           >
             Elegir
           </button>
@@ -112,8 +127,8 @@ function AppHomePage() {
         {(isAdminArea || isLeader || isParticipant) && (
           <button
             type="button"
-            className={`app-tab ${activeTab === 'teams' ? 'app-tab-active' : ''}`}
-            onClick={() => handleTabChange('teams')}
+            className={`app-tab ${activeTab === "teams" ? "app-tab-active" : ""}`}
+            onClick={() => handleTabChange("teams")}
           >
             Equipos
           </button>
@@ -123,16 +138,16 @@ function AppHomePage() {
           <>
             <button
               type="button"
-              className={`app-tab ${activeTab === 'users' ? 'app-tab-active' : ''}`}
-              onClick={() => handleTabChange('users')}
+              className={`app-tab ${activeTab === "users" ? "app-tab-active" : ""}`}
+              onClick={() => handleTabChange("users")}
             >
               Usuarios
             </button>
 
             <button
               type="button"
-              className={`app-tab ${activeTab === 'system' ? 'app-tab-active' : ''}`}
-              onClick={() => handleTabChange('system')}
+              className={`app-tab ${activeTab === "system" ? "app-tab-active" : ""}`}
+              onClick={() => handleTabChange("system")}
             >
               Sistema
             </button>
@@ -141,14 +156,19 @@ function AppHomePage() {
       </nav>
 
       <div className="app-main-scroll">
-        <section key={activeTab} className={`app-content app-content-${animationDirection}`}>
-          {activeTab === 'team' && (isLeader || isParticipant) && <MyTeamPage />}
-          {activeTab === 'draft' && isLeader && (
-            <DraftPage onPickCompleted={() => handleTabChange('team')} />
+        <section
+          key={activeTab}
+          className={`app-content app-content-${animationDirection}`}
+        >
+          {activeTab === "team" && (isLeader || isParticipant) && (
+            <MyTeamPage />
           )}
-          {activeTab === 'teams' && <TeamsPage />}
-          {activeTab === 'users' && isAdminArea && <UsersPage />}
-          {activeTab === 'system' && isAdminArea && <SystemPage />}
+          {activeTab === "draft" && isLeader && (
+            <DraftPage onPickCompleted={() => handleTabChange("team")} />
+          )}
+          {activeTab === "teams" && <TeamsPage />}
+          {activeTab === "users" && isAdminArea && <UsersPage />}
+          {activeTab === "system" && isAdminArea && <SystemPage />}
         </section>
       </div>
 
@@ -160,12 +180,12 @@ function AppHomePage() {
           showDangerActions={false}
           onClose={() => setIsProfileOpen(false)}
           onUserChanged={async () => {
-            await refreshOwnProfile()
+            await refreshOwnProfile();
           }}
         />
       )}
     </main>
-  )
+  );
 }
 
-export default AppHomePage
+export default AppHomePage;

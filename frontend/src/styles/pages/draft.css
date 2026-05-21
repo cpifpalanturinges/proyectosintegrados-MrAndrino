@@ -10,12 +10,12 @@
 
 .draft-sort-label {
   position: relative;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
   color: var(--color-text-soft);
   font-weight: 900;
-  z-index: 20;
 }
 
 .draft-sort-dropdown {
@@ -75,7 +75,11 @@
   border: 0.0625rem solid rgba(49, 183, 219, 0.26);
   border-radius: var(--radius-md);
   background:
-    radial-gradient(circle at top right, rgba(49, 183, 219, 0.12), transparent 12rem),
+    radial-gradient(
+      circle at top right,
+      rgba(49, 183, 219, 0.12),
+      transparent 12rem
+    ),
     var(--color-bg);
   box-shadow: 0 1.2rem 2.6rem rgba(0, 0, 0, 0.42);
   animation: draftDropdownIn 0.18s ease both;
@@ -148,7 +152,11 @@
   padding: 1.25rem;
   border-radius: 1.5rem;
   background:
-    radial-gradient(circle at top right, rgba(49, 183, 219, 0.18), transparent 18rem),
+    radial-gradient(
+      circle at top right,
+      rgba(49, 183, 219, 0.18),
+      transparent 18rem
+    ),
     var(--color-bg);
   border: 0.0625rem solid rgba(235, 235, 235, 0.12);
   box-shadow: var(--shadow-soft);
@@ -169,6 +177,69 @@
 
 .draft-confirm-copy strong {
   color: var(--color-text);
+}
+
+.draft-refreshing {
+  margin: 0 0 0.85rem;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.draft-paused-card {
+  padding: 1rem;
+  border: 0.0625rem solid rgba(255, 170, 90, 0.26);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 145, 60, 0.16),
+      transparent 18rem
+    ),
+    rgba(235, 235, 235, 0.055);
+}
+
+.draft-paused-card h3 {
+  margin: 0.25rem 0 0.65rem;
+  color: #ffd3a3;
+  font-size: clamp(1.7rem, 7vw, 2.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.draft-paused-card p:not(.team-card-kicker) {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.draft-refresh-button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.95rem;
+  border: 0.0625rem solid rgba(255, 170, 90, 0.45);
+  border-radius: var(--radius-md);
+  background: rgba(255, 145, 60, 0.16);
+  color: #ffd3a3;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.draft-refresh-button:hover {
+  background: rgba(255, 145, 60, 0.24);
+  border-color: rgba(255, 170, 90, 0.7);
+  box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.22);
+  transform: translateY(-0.0625rem);
+}
+
+.draft-refresh-button:active {
+  transform: scale(0.97);
 }
 
 @keyframes draftDropdownIn {
@@ -198,11 +269,4 @@
   .draft-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
-
-.draft-refreshing {
-  margin: 0 0 0.85rem;
-  color: var(--color-primary);
-  font-size: 0.95rem;
-  font-weight: 900;
 }

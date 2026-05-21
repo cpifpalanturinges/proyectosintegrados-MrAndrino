@@ -1,115 +1,121 @@
-import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { getAdminUserById } from '../../api/adminUserApi'
-import { getTeamById, getTeams } from '../../api/teamApi'
-import UserCard from '../../components/UserCard'
-import UserProfileContent, { type UserProfileModalData } from '../../components/UserProfileContent'
-import { useAnimatedModalClose } from '../../hooks/useAnimatedModalClose'
-import type { TeamDetail, TeamListItem } from '../../types/teamTypes'
-import { getStoredUser, getToken } from '../../utils/authStorage'
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { getAdminUserById } from "../../api/adminUserApi";
+import { getTeamById, getTeams } from "../../api/teamApi";
+import UserCard from "../../components/users/UserCard";
+import UserProfileContent, {
+  type UserProfileModalData,
+} from "../../components/profile/UserProfileContent";
+import { useAnimatedModalClose } from "../../hooks/useAnimatedModalClose";
+import type { TeamDetail, TeamListItem } from "../../types/teamTypes";
+import { getStoredUser, getToken } from "../../utils/authStorage";
 
-type TeamUserKind = 'leader' | 'member'
-type TeamModalView = 'team' | 'user'
-type TeamModalDirection = 'forward' | 'back'
+type TeamUserKind = "leader" | "member";
+type TeamModalView = "team" | "user";
+type TeamModalDirection = "forward" | "back";
 
 function TeamsPage() {
-  const token = getToken()
-  const currentUser = getStoredUser()
-  const canManageUsers = currentUser?.role === 'Admin' || currentUser?.role === 'Coordinator'
+  const token = getToken();
+  const currentUser = getStoredUser();
+  const canManageUsers =
+    currentUser?.role === "Admin" || currentUser?.role === "Coordinator";
 
-  const [teams, setTeams] = useState<TeamListItem[]>([])
-  const [selectedTeam, setSelectedTeam] = useState<TeamDetail | null>(null)
-  const [selectedUser, setSelectedUser] = useState<UserProfileModalData | null>(null)
+  const [teams, setTeams] = useState<TeamListItem[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<TeamDetail | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserProfileModalData | null>(
+    null,
+  );
 
-  const [modalView, setModalView] = useState<TeamModalView>('team')
-  const [modalDirection, setModalDirection] = useState<TeamModalDirection>('forward')
+  const [modalView, setModalView] = useState<TeamModalView>("team");
+  const [modalDirection, setModalDirection] =
+    useState<TeamModalDirection>("forward");
 
-  const [search, setSearch] = useState('')
-  const [isLoadingTeams, setIsLoadingTeams] = useState(true)
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
-  const [error, setError] = useState('')
+  const [search, setSearch] = useState("");
+  const [isLoadingTeams, setIsLoadingTeams] = useState(true);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [error, setError] = useState("");
 
   const {
     isClosing: isTeamModalClosing,
     closeWithAnimation: closeTeamDetailWithAnimation,
     resetClosingState: resetTeamModalClosingState,
-  } = useAnimatedModalClose(closeTeamDetail)
+  } = useAnimatedModalClose(closeTeamDetail);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      loadTeams(search)
-    }, 300)
+      loadTeams(search);
+    }, 300);
 
     return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [search])
+      window.clearTimeout(timeoutId);
+    };
+  }, [search]);
 
   async function loadTeams(searchValue: string) {
     if (!token) {
-      setError('Sesión no válida.')
-      setIsLoadingTeams(false)
-      return
+      setError("Sesión no válida.");
+      setIsLoadingTeams(false);
+      return;
     }
 
-    setError('')
-    setIsLoadingTeams(true)
+    setError("");
+    setIsLoadingTeams(true);
 
     try {
-      const data = await getTeams(token, searchValue)
-      setTeams(data)
+      const data = await getTeams(token, searchValue);
+      setTeams(data);
     } catch (apiError) {
-      console.error(apiError)
-      setError('No se han podido cargar los equipos.')
+      console.error(apiError);
+      setError("No se han podido cargar los equipos.");
     } finally {
-      setIsLoadingTeams(false)
+      setIsLoadingTeams(false);
     }
   }
 
   async function handleSelectTeam(teamId: number) {
     if (!token) {
-      setError('Sesión no válida.')
-      return
+      setError("Sesión no válida.");
+      return;
     }
 
-    setError('')
-    setIsLoadingDetail(true)
+    setError("");
+    setIsLoadingDetail(true);
 
     try {
-      const data = await getTeamById(token, teamId)
-      setSelectedTeam(data)
-      setSelectedUser(null)
-      setModalView('team')
-      setModalDirection('forward')
-      resetTeamModalClosingState()
+      const data = await getTeamById(token, teamId);
+      setSelectedTeam(data);
+      setSelectedUser(null);
+      setModalView("team");
+      setModalDirection("forward");
+      resetTeamModalClosingState();
     } catch (apiError) {
-      console.error(apiError)
-      setError('No se ha podido cargar el detalle del equipo.')
+      console.error(apiError);
+      setError("No se ha podido cargar el detalle del equipo.");
     } finally {
-      setIsLoadingDetail(false)
+      setIsLoadingDetail(false);
     }
   }
 
   function closeTeamDetail() {
-    setSelectedTeam(null)
-    setSelectedUser(null)
-    setModalView('team')
-    setModalDirection('forward')
+    setSelectedTeam(null);
+    setSelectedUser(null);
+    setModalView("team");
+    setModalDirection("forward");
   }
 
   async function refreshSelectedTeam() {
     if (!token || !selectedTeam) {
-      return
+      return;
     }
 
-    const updatedTeam = await getTeamById(token, selectedTeam.teamId)
-    setSelectedTeam(updatedTeam)
+    const updatedTeam = await getTeamById(token, selectedTeam.teamId);
+    setSelectedTeam(updatedTeam);
   }
 
   async function refreshSelectedTeamUser(userId: number) {
     if (!token) {
-      setError('Sesión no válida.')
-      return
+      setError("Sesión no válida.");
+      return;
     }
 
     if (canManageUsers) {
@@ -117,60 +123,60 @@ function TeamsPage() {
         getAdminUserById(userId, token),
         refreshSelectedTeam(),
         loadTeams(search),
-      ])
+      ]);
 
-      setSelectedUser(updatedUser)
-      return
+      setSelectedUser(updatedUser);
+      return;
     }
 
-    await refreshSelectedTeam()
+    await refreshSelectedTeam();
   }
 
   async function handleUserDeletedFromTeam() {
-    setSelectedUser(null)
-    setModalView('team')
-    setModalDirection('back')
+    setSelectedUser(null);
+    setModalView("team");
+    setModalDirection("back");
 
     if (selectedTeam) {
       try {
-        await refreshSelectedTeam()
+        await refreshSelectedTeam();
       } catch {
-        setSelectedTeam(null)
+        setSelectedTeam(null);
       }
     }
 
-    await loadTeams(search)
+    await loadTeams(search);
   }
 
   async function handleSelectTeamUser(
-    user: TeamDetail['leader'] | TeamDetail['members'][number],
+    user: TeamDetail["leader"] | TeamDetail["members"][number],
     kind: TeamUserKind,
   ) {
     if (!token || !selectedTeam) {
-      setError('Sesión no válida.')
-      return
+      setError("Sesión no válida.");
+      return;
     }
 
-    setError('')
+    setError("");
 
     if (canManageUsers) {
       try {
-        const data = await getAdminUserById(user.userId, token)
-        setSelectedUser(data)
-        setModalDirection('forward')
-        setModalView('user')
+        const data = await getAdminUserById(user.userId, token);
+        setSelectedUser(data);
+        setModalDirection("forward");
+        setModalView("user");
       } catch (apiError) {
-        console.error(apiError)
-        setError('No se ha podido cargar el perfil del usuario.')
+        console.error(apiError);
+        setError("No se ha podido cargar el perfil del usuario.");
       }
 
-      return
+      return;
     }
 
     setSelectedUser({
       userId: user.userId,
-      username: '',
-      role: kind === 'leader' ? 'Leader' : 'Participant',
+      username: "",
+      role: kind === "leader" ? "Leader" : "Participant",
       firstName: user.firstName,
       lastName: user.lastName,
       photoPath: user.photoPath,
@@ -181,23 +187,23 @@ function TeamsPage() {
       skill4: user.skill4,
       assignedTeamId: selectedTeam.teamId,
       assignedTeamName: selectedTeam.name,
-      pickId: kind === 'member' ? user.pickId : null,
-    })
+      pickId: kind === "member" ? user.pickId : null,
+    });
 
-    setModalDirection('forward')
-    setModalView('user')
+    setModalDirection("forward");
+    setModalView("user");
   }
 
   function handleBackToTeam() {
-    setModalDirection('back')
-    setModalView('team')
+    setModalDirection("back");
+    setModalView("team");
   }
 
   const teamModal =
     selectedTeam &&
     createPortal(
       <div
-        className={`team-detail-backdrop ${isTeamModalClosing ? 'modal-closing' : ''}`}
+        className={`team-detail-backdrop ${isTeamModalClosing ? "modal-closing" : ""}`}
         role="presentation"
         onClick={closeTeamDetailWithAnimation}
       >
@@ -205,14 +211,16 @@ function TeamsPage() {
           className="team-detail-panel"
           role="dialog"
           aria-modal="true"
-          aria-label={modalView === 'team' ? 'Detalle del equipo' : 'Perfil de usuario'}
+          aria-label={
+            modalView === "team" ? "Detalle del equipo" : "Perfil de usuario"
+          }
           onClick={(event) => event.stopPropagation()}
         >
           <div
             key={modalView}
             className={`team-modal-view team-modal-view-${modalDirection} team-modal-view-${modalView}`}
           >
-            {modalView === 'team' && (
+            {modalView === "team" && (
               <>
                 <div className="team-detail-header">
                   <div>
@@ -240,7 +248,9 @@ function TeamsPage() {
                       <UserCard
                         user={selectedTeam.leader}
                         clickable
-                        onClick={() => handleSelectTeamUser(selectedTeam.leader, 'leader')}
+                        onClick={() =>
+                          handleSelectTeamUser(selectedTeam.leader, "leader")
+                        }
                       />
                     </div>
 
@@ -248,7 +258,9 @@ function TeamsPage() {
                       <h4>Miembros</h4>
 
                       {selectedTeam.members.length === 0 ? (
-                        <p className="app-muted">Este equipo todavía no tiene miembros.</p>
+                        <p className="app-muted">
+                          Este equipo todavía no tiene miembros.
+                        </p>
                       ) : (
                         <div className="team-members-list">
                           {selectedTeam.members.map((member) => (
@@ -256,7 +268,9 @@ function TeamsPage() {
                               key={member.userId}
                               user={member}
                               clickable
-                              onClick={() => handleSelectTeamUser(member, 'member')}
+                              onClick={() =>
+                                handleSelectTeamUser(member, "member")
+                              }
                             />
                           ))}
                         </div>
@@ -267,7 +281,7 @@ function TeamsPage() {
               </>
             )}
 
-            {modalView === 'user' && selectedUser && (
+            {modalView === "user" && selectedUser && (
               <UserProfileContent
                 user={selectedUser}
                 title="Perfil de usuario"
@@ -284,7 +298,7 @@ function TeamsPage() {
         </section>
       </div>,
       document.body,
-    )
+    );
 
   return (
     <>
@@ -311,7 +325,9 @@ function TeamsPage() {
         {isLoadingTeams ? (
           <p className="app-muted">Cargando equipos...</p>
         ) : teams.length === 0 ? (
-          <p className="app-muted">No hay equipos que coincidan con la búsqueda.</p>
+          <p className="app-muted">
+            No hay equipos que coincidan con la búsqueda.
+          </p>
         ) : (
           <div className="teams-grid">
             {teams.map((team) => (
@@ -324,7 +340,11 @@ function TeamsPage() {
                 <span className="team-card-kicker">Equipo</span>
                 <strong>{team.name}</strong>
                 <span>Líder: {team.leaderName}</span>
-                <span>{team.membersCount === 1 ? '1 miembro' : `${team.membersCount} miembros`}</span>
+                <span>
+                  {team.membersCount === 1
+                    ? "1 miembro"
+                    : `${team.membersCount} miembros`}
+                </span>
               </button>
             ))}
           </div>
@@ -333,7 +353,7 @@ function TeamsPage() {
 
       {teamModal}
     </>
-  )
+  );
 }
 
-export default TeamsPage
+export default TeamsPage;
