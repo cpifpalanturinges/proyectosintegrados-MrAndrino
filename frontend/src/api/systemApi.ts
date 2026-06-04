@@ -1,5 +1,6 @@
 import { apiRequest } from "./apiClient";
 import type { CoordinatorListItem } from "../types/organizerTypes";
+import type { PagedResult } from "../types/paginationTypes";
 import type {
   PickHistoryItem,
   UndoPickResult,
@@ -32,8 +33,29 @@ export function pauseDraft(token: string) {
   });
 }
 
-export function getPicksHistory(token: string) {
-  return apiRequest<PickHistoryItem[]>("/api/admin/system/picks", {
+export function getPicksHistory(
+  token: string,
+  options: {
+    page?: number;
+    pageSize?: number;
+  } = {},
+) {
+  const params = new URLSearchParams();
+
+  if (options.page) {
+    params.set("page", String(options.page));
+  }
+
+  if (options.pageSize) {
+    params.set("pageSize", String(options.pageSize));
+  }
+
+  const query = params.toString();
+  const endpoint = query
+    ? `/api/admin/system/picks?${query}`
+    : "/api/admin/system/picks";
+
+  return apiRequest<PagedResult<PickHistoryItem>>(endpoint, {
     token,
   });
 }

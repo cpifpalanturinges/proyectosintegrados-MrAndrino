@@ -1,14 +1,17 @@
 import { createPortal } from "react-dom";
+import PaginationControls from "../PaginationControls";
+import type { PagedResult } from "../../types/paginationTypes";
 import type { PickHistoryItem } from "../../types/pickHistoryTypes";
 
 type PickHistoryModalProps = {
   isOpen: boolean;
   isClosing: boolean;
-  picks: PickHistoryItem[];
+  picksPage: PagedResult<PickHistoryItem>;
   isLoading: boolean;
   undoingPickId: number | null;
   onClose: () => void;
   onRefresh: () => void;
+  onPageChange: (page: number) => void;
   onRequestUndo: (pick: PickHistoryItem) => void;
   formatDateTime: (value: string) => string;
   getPickUserName: (pick: PickHistoryItem) => string;
@@ -17,11 +20,12 @@ type PickHistoryModalProps = {
 function PickHistoryModal({
   isOpen,
   isClosing,
-  picks,
+  picksPage,
   isLoading,
   undoingPickId,
   onClose,
   onRefresh,
+  onPageChange,
   onRequestUndo,
   formatDateTime,
   getPickUserName,
@@ -30,7 +34,9 @@ function PickHistoryModal({
     return null;
   }
 
-  const activePicksCount = picks.filter((pick) => !pick.isCancelled).length;
+  const activePicksCount = picksPage.items.filter(
+    (pick) => !pick.isCancelled,
+  ).length;
 
   return createPortal(
     <div
@@ -64,9 +70,9 @@ function PickHistoryModal({
 
         <div className="system-modal-toolbar">
           <p>
-            {picks.length === 0
+            {picksPage.totalItems === 0
               ? "Todavía no hay elecciones registradas."
-              : `${picks.length} elecciones registradas · ${activePicksCount} activas`}
+              : `${picksPage.totalItems} elecciones registradas · ${activePicksCount} activas en esta página`}
           </p>
 
           <button
@@ -81,54 +87,66 @@ function PickHistoryModal({
 
         {isLoading ? (
           <p className="app-muted">Cargando historial de elecciones...</p>
-        ) : picks.length === 0 ? (
+        ) : picksPage.items.length === 0 ? (
           <p className="app-muted">
             Todavía no se ha realizado ninguna elección.
           </p>
         ) : (
-          <div className="system-picks-list">
-            {picks.map((pick) => {
-              const isUndoingThisPick = undoingPickId === pick.pickId;
+          <>
+            <div className="system-picks-list">
+              {picksPage.items.map((pick) => {
+                const isUndoingThisPick = undoingPickId === pick.pickId;
 
-              return (
-                <article
-                  key={pick.pickId}
-                  className={`system-pick-card ${
-                    pick.isCancelled ? "system-pick-card-cancelled" : ""
-                  }`}
-                >
-                  <div className="system-pick-main">
-                    <span className="system-pick-order">#{pick.pickOrder}</span>
+                return (
+                  <article
+                    key={pick.pickId}
+                    className={`system-pick-card ${
+                      pick.isCancelled ? "system-pick-card-cancelled" : ""
+                    }`}
+                  >
+                    <div className="system-pick-main">
+                      <span className="system-pick-order">
+                        #{pick.pickOrder}
+                      </span>
 
-                    <div>
-                      <strong>{getPickUserName(pick)}</strong>
-                      <p>{pick.teamName}</p>
-                      <small>{formatDateTime(pick.createdAt)}</small>
+                      <div>
+                        <strong>{getPickUserName(pick)}</strong>
+                        <p>{pick.teamName}</p>
+                        <small>{formatDateTime(pick.createdAt)}</small>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="system-pick-actions">
-                    <span
-                      className={`system-pick-status ${
-                        pick.isCancelled ? "system-pick-status-cancelled" : ""
-                      }`}
-                    >
-                      {pick.isCancelled ? "Cancelado" : "Activo"}
-                    </span>
+                    <div className="system-pick-actions">
+                      <span
+                        className={`system-pick-status ${
+                          pick.isCancelled
+                            ? "system-pick-status-cancelled"
+                            : ""
+                        }`}
+                      >
+                        {pick.isCancelled ? "Cancelado" : "Activo"}
+                      </span>
 
-                    <button
-                      type="button"
-                      className="system-danger-button"
-                      onClick={() => onRequestUndo(pick)}
-                      disabled={pick.isCancelled || isUndoingThisPick}
-                    >
-                      {isUndoingThisPick ? "Deshaciendo..." : "Deshacer"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      <button
+                        type="button"
+                        className="system-danger-button"
+                        onClick={() => onRequestUndo(pick)}
+                        disabled={pick.isCancelled || isUndoingThisPick}
+                      >
+                        {isUndoingThisPick ? "Deshaciendo..." : "Deshacer"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <PaginationControls
+              pagination={picksPage}
+              isLoading={isLoading}
+              onPageChange={onPageChange}
+            />
+          </>
         )}
       </section>
     </div>,

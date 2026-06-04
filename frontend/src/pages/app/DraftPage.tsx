@@ -3,16 +3,30 @@ import { createPortal } from "react-dom";
 import { getAvailableParticipants } from "../../api/participantApi";
 import { createPick } from "../../api/pickApi";
 import { getPublicSystemStatus } from "../../api/systemApi";
+import PaginationControls from "../../components/PaginationControls";
 import UserCard from "../../components/users/UserCard";
 import type {
   AvailableParticipant,
   ParticipantSortBy,
 } from "../../types/participantTypes";
+import type { PagedResult } from "../../types/paginationTypes";
 import type { SystemStatus } from "../../types/systemTypes";
 import { getToken } from "../../utils/authStorage";
 
 type DraftPageProps = {
   onPickCompleted?: () => void;
+};
+
+const PARTICIPANTS_PAGE_SIZE = 12;
+
+const emptyParticipantsPage: PagedResult<AvailableParticipant> = {
+  items: [],
+  page: 1,
+  pageSize: PARTICIPANTS_PAGE_SIZE,
+  totalItems: 0,
+  totalPages: 0,
+  hasPreviousPage: false,
+  hasNextPage: false,
 };
 
 const sortOptions: Array<{
@@ -34,12 +48,14 @@ function DraftPage({ onPickCompleted }: DraftPageProps) {
   const token = getToken();
 
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
-  const [participants, setParticipants] = useState<AvailableParticipant[]>([]);
+  const [participantsPage, setParticipantsPage] =
+    useState<PagedResult<AvailableParticipant>>(emptyParticipantsPage);
   const [selectedParticipant, setSelectedParticipant] =
     useState<AvailableParticipant | null>(null);
 
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<ParticipantSortBy>("total");
+  const [page, setPage] = useState(1);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
@@ -84,20 +100,24 @@ function DraftPage({ onPickCompleted }: DraftPageProps) {
   }, []);
 
   useEffect(() => {
+    setPage(1);
+  }, [search, sortBy]);
+
+  useEffect(() => {
     if (!isDraftOpen) {
-      setParticipants([]);
+      setParticipantsPage(emptyParticipantsPage);
       setHasLoadedParticipants(false);
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      void loadParticipants(search, sortBy);
+      void loadParticipants(search, sortBy, page);
     }, 300);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [search, sortBy, isDraftOpen]);
+  }, [search, sortBy, page, isDraftOpen]);
 
   async function loadStatus(
     options: {
@@ -147,6 +167,7 @@ function DraftPage({ onPickCompleted }: DraftPageProps) {
   async function loadParticipants(
     searchValue: string,
     sortValue: ParticipantSortBy,
+    pageValue: number,
   ) {
     if (!token) {
       setError("Sesión no válida.");
@@ -161,9 +182,11 @@ function DraftPage({ onPickCompleted }: DraftPageProps) {
       const data = await getAvailableParticipants(token, {
         search: searchValue,
         sortBy: sortValue,
+        page: pageValue,
+        pageSize: PARTICIPANTS_PAGE_SIZE,
       });
 
-      setParticipants(data);
+      setParticipantsPage(data);
       setHasLoadedParticipants(true);
     } catch (apiError) {
       console.error(apiError);
@@ -400,19 +423,27 @@ function DraftPage({ onPickCompleted }: DraftPageProps) {
 
             {isFirstLoad ? (
               <p className="app-muted">Cargando participantes...</p>
-            ) : participants.length === 0 ? (
+            ) : participantsPage.items.length === 0 ? (
               <p className="app-muted">No hay participantes disponibles.</p>
             ) : (
-              <div className="draft-grid">
-                {participants.map((participant) => (
-                  <UserCard
-                    key={participant.userId}
-                    user={participant}
-                    clickable
-                    onClick={() => void handleSelectParticipant(participant)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="draft-grid">
+                  {participantsPage.items.map((participant) => (
+                    <UserCard
+                      key={participant.userId}
+                      user={participant}
+                      clickable
+                      onClick={() => void handleSelectParticipant(participant)}
+                    />
+                  ))}
+                </div>
+
+                <PaginationControls
+                  pagination={participantsPage}
+                  isLoading={isLoading}
+                  onPageChange={setPage}
+                />
+              </>
             )}
           </>
         )}

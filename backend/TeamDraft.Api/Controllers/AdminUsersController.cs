@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Admin;
+using TeamDraft.Api.DTOs.Common;
 using TeamDraft.Api.Entities;
 using TeamDraft.Api.Services.Interfaces;
 
@@ -31,23 +32,33 @@ public class AdminUsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<UserListDto>>> GetUsers([FromQuery] string? search)
+    public async Task<ActionResult<PagedResultDto<UserListDto>>> GetUsers([FromQuery] UserListQueryDto request)
     {
         var query = _context.Users
             .Where(u => u.Role == "Leader" || u.Role == "Participant");
 
-        if (!string.IsNullOrWhiteSpace(search))
+        if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var s = search.Trim().ToLower();
+            var search = request.Search.Trim().ToLower();
 
             query = query.Where(u =>
-                u.FirstName.ToLower().Contains(s) ||
-                u.LastName.ToLower().Contains(s) ||
-                u.Username.ToLower().Contains(s)
+                u.FirstName.ToLower().Contains(search) ||
+                u.LastName.ToLower().Contains(search) ||
+                u.Username.ToLower().Contains(search)
             );
         }
 
-        var users = await query
+        if (!string.IsNullOrWhiteSpace(request.Role) && request.Role != "all")
+        {
+            if (request.Role is not ("Leader" or "Participant"))
+            {
+                return BadRequest("Role filter must be Leader, Participant or all.");
+            }
+
+            query = query.Where(u => u.Role == request.Role);
+        }
+
+        var usersQuery = query
             .OrderBy(u => u.FirstName)
             .ThenBy(u => u.LastName)
             .Select(u => new UserListDto
@@ -58,8 +69,9 @@ public class AdminUsersController : ControllerBase
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 PhotoPath = u.PhotoPath
-            })
-            .ToListAsync();
+            });
+
+        var users = await usersQuery.ToPagedResultAsync(request.Page, request.PageSize);
 
         return Ok(users);
     }

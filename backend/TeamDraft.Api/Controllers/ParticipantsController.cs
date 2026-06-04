@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeamDraft.Api.Data;
+using TeamDraft.Api.DTOs.Common;
 using TeamDraft.Api.DTOs.Participants;
 
 namespace TeamDraft.Api.Controllers;
@@ -19,7 +20,7 @@ public class ParticipantsController : ControllerBase
     }
 
     [HttpGet("available")]
-    public async Task<ActionResult<List<AvailableParticipantDto>>> GetAvailable([FromQuery] AvailableParticipantsQueryDto query)
+    public async Task<ActionResult<PagedResultDto<AvailableParticipantDto>>> GetAvailable([FromQuery] AvailableParticipantsQueryDto query)
     {
         var participantsQuery = _context.Users
             .Where(u => u.Role == "Participant" && u.AssignedTeamId == null);
@@ -45,7 +46,7 @@ public class ParticipantsController : ControllerBase
                 .ThenBy(u => u.LastName)
         };
 
-        var participants = await participantsQuery
+        var participantsQueryDto = participantsQuery
             .Select(u => new AvailableParticipantDto
             {
                 UserId = u.UserId,
@@ -57,8 +58,9 @@ public class ParticipantsController : ControllerBase
                 Skill2 = u.Skill2,
                 Skill3 = u.Skill3,
                 Skill4 = u.Skill4
-            })
-            .ToListAsync();
+            });
+
+        var participants = await participantsQueryDto.ToPagedResultAsync(query.Page, query.PageSize);
 
         return Ok(participants);
     }

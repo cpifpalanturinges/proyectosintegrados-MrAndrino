@@ -1,6 +1,7 @@
 # TeamDraft (by Diverxia)
 
-**TeamDraft** es una aplicación web para gestionar la formación de equipos en un hackatón mediante un sistema de selección por turnos o *draft*. El proyecto está vinculado a **Diverxia Consulting** y permite administrar usuarios, equipos, líderes, participantes, coordinadores y el estado del evento desde una interfaz web responsive.
+**TeamDraft** es una aplicación web para gestionar la formación de equipos en un hackatón mediante un sistema de selección por turnos o *draft*.  
+El proyecto está vinculado a **Diverxia Consulting** y permite administrar usuarios, equipos, líderes, participantes, coordinadores y el estado del evento desde una interfaz web responsive.
 
 La aplicación cuenta con una zona de gestión protegida por roles y una API REST que comunica el frontend con el backend.
 
@@ -15,11 +16,16 @@ La aplicación cuenta con una zona de gestión protegida por roles y una API RES
 | Ciclo | Desarrollo de Aplicaciones Web |
 | Empresa vinculada | Diverxia Consulting |
 | Repositorio | Repositorio privado de GitHub con acceso para el profesorado |
-| Anteproyecto | [`ANTEPROYECTO.md`](ANTEPROYECTO.md) / [`Notion`](https://app.notion.com/p/Anteproyecto-3292e73c9ca1801ca3bee15c8fb083d2?v=1132e73c9ca18058a8dc000c85ec9c30&source=copy_link) |
+| Anteproyecto | [`ANTEPROYECTO.md`](ANTEPROYECTO.md) / [Notion](https://app.notion.com/p/Anteproyecto-3292e73c9ca1801ca3bee15c8fb083d2?v=1132e73c9ca18058a8dc000c85ec9c30&source=copy_link) |
 | Esquema E/R | [`docs/er-diagram.pdf`](docs/er-diagram.pdf) |
+| Manual de uso | [`docs/manual-uso.md`](docs/manual-uso.md) |
+| Bitácora | [`docs/bitacora.md`](docs/bitacora.md) |
+| Bibliografía | [`docs/bibliografia.md`](docs/bibliografia.md) |
+| Justificación de tecnologías | [`docs/justificacion-tecnologias.md`](docs/justificacion-tecnologias.md) |
+| Diseño de interfaces | [`docs/diseno-interfaces.md`](docs/diseno-interfaces.md) |
 | Aplicación desplegada | Pendiente de despliegue en AWS |
 | Landing page | Pendiente de implementación/despliegue |
-| Diseño de la aplicación | Diseño aplicado directamente sobre la interfaz funcional; enlace/capturas pendientes si procede |
+| Despliegue | Pendiente de documentar tras realizar el despliegue en AWS |
 | Presentación PDF | Pendiente de añadir |
 | Vídeo demostrativo | Pendiente de añadir |
 
@@ -31,7 +37,7 @@ La aplicación cuenta con una zona de gestión protegida por roles y una API RES
 - Permitir que los líderes seleccionen participantes mediante un sistema de turnos controlado.
 - Centralizar la gestión de usuarios, equipos, coordinadores y estado del evento.
 - Ofrecer un panel de administración protegido por roles.
-- Exponer una API REST documentada para el consumo desde el frontend.
+- Exponer una API REST para el consumo desde el frontend.
 - Crear una interfaz responsive, usable en móvil, tablet y escritorio.
 - Preparar el proyecto para su despliegue en AWS como entrega académica.
 - Mantener una base reutilizable para un posible despliegue estable destinado al uso interno de la empresa.
@@ -40,9 +46,11 @@ La aplicación cuenta con una zona de gestión protegida por roles y una API RES
 
 ## Descripción funcional
 
-TeamDraft resuelve la organización de equipos en un evento tipo hackatón. Los usuarios pueden registrarse como participantes o líderes. Los líderes tienen un equipo asociado y pueden seleccionar participantes disponibles cuando el draft está abierto. Las selecciones quedan registradas en un historial, pueden anularse desde administración y se reflejan en una vista pública pensada para mostrarse en pantalla o proyector.
+TeamDraft resuelve la organización de equipos en un evento tipo hackatón.
 
-La parte de gestión permite administrar usuarios, equipos, coordinadores, picks y estado del evento. El acceso a estas funcionalidades está restringido según el rol del usuario autenticado.
+Los usuarios pueden registrarse como participantes o líderes. Los líderes tienen un equipo asociado y pueden seleccionar participantes disponibles cuando el draft está abierto. Las selecciones quedan registradas en un historial, pueden anularse desde administración y se reflejan en una vista pública pensada para mostrarse en pantalla o proyector.
+
+La zona de gestión permite administrar usuarios, equipos, coordinadores, picks y estado del evento. El acceso a estas funcionalidades está restringido según el rol del usuario autenticado.
 
 ---
 
@@ -62,6 +70,7 @@ La parte de gestión permite administrar usuarios, equipos, coordinadores, picks
 ### Backend
 
 - ASP.NET Core Web API (.NET 8)
+- C#
 - Entity Framework Core
 - MySQL
 - Pomelo.EntityFrameworkCore.MySql
@@ -79,12 +88,6 @@ La parte de gestión permite administrar usuarios, equipos, coordinadores, picks
 - SessionStorage
 - Prettier
 
-### Base de datos
-
-- MySQL
-- Migraciones de Entity Framework Core
-- Seeder inicial para datos mínimos del sistema
-
 ### Despliegue previsto
 
 - AWS EC2
@@ -98,23 +101,29 @@ La parte de gestión permite administrar usuarios, equipos, coordinadores, picks
 
 ## Justificación de tecnologías
 
-Los enunciados originales de algunos módulos proponen Laravel, Blade, Laravel Sanctum, Angular y una API PHP. En este proyecto se utiliza una arquitectura alternativa basada en **ASP.NET Core Web API + React + MySQL**, manteniendo las funcionalidades exigidas y adaptando la implementación al contexto tecnológico utilizado durante la fase FCT.
+Algunos requisitos originales plantean tecnologías como Laravel, Blade, Laravel Sanctum o Angular.  
+En este proyecto se ha utilizado un stack adaptado a las tecnologías trabajadas durante la formación y autorizado por el tutor.
 
-| Requisito original | Equivalencia en TeamDraft |
+La justificación completa se encuentra en:
+
+- [`docs/justificacion-tecnologias.md`](docs/justificacion-tecnologias.md)
+
+Equivalencias principales:
+
+| Requisito original | Tecnología utilizada |
 |---|---|
-| Laravel 11/12 | ASP.NET Core Web API (.NET 8) |
-| Migraciones Laravel | Entity Framework Core Migrations |
-| Semilleros Laravel | `DbSeeder.cs` |
+| Laravel 11/12 | ASP.NET Core Web API |
+| PHP | C# |
 | Laravel Sanctum | JWT Bearer Authentication |
-| Blade | React + Vite + TypeScript |
-| Middlewares de autenticación/autorización | Middleware de autenticación de ASP.NET Core + `[Authorize]` |
-| Rutas protegidas por rol | `[Authorize(Roles = "...")]` |
-| Laravel Storage | `PhotoService` + `wwwroot` para almacenamiento de fotos |
+| Blade | React |
+| Migraciones Laravel | Entity Framework Core Migrations |
+| Seeders Laravel | `DbSeeder` |
+| Middleware Laravel | `[Authorize]` en ASP.NET Core |
 | Angular CLI | Vite |
-| Angular RouterModule | React Router DOM |
-| Angular HttpClientModule | `fetch` centralizado en `apiClient.ts` |
-| Observables / @Input / @Output | Estado de React, props y callbacks |
-| LocalStorage / SessionStorage | SessionStorage |
+| RouterModule | React Router |
+| HttpClientModule | Cliente propio con `fetch` |
+| Observables / Input / Output | Estado React, props y callbacks |
+| LocalStorage / SessionStorage | `sessionStorage` |
 
 ---
 
@@ -134,7 +143,12 @@ proyectosintegrados-MrAndrino/
 │       ├── Program.cs
 │       └── TeamDraft.Api.csproj
 ├── docs/
-│   └── er-diagram.pdf
+│   ├── bibliografia.md
+│   ├── bitacora.md
+│   ├── diseno-interfaces.md
+│   ├── er-diagram.pdf
+│   ├── justificacion-tecnologias.md
+│   └── manual-uso.md
 ├── frontend/
 │   ├── src/
 │   │   ├── api/
@@ -153,9 +167,25 @@ proyectosintegrados-MrAndrino/
 
 ---
 
+## Documentación
+
+| Documento | Descripción |
+|---|---|
+| [`ANTEPROYECTO.md`](ANTEPROYECTO.md) | Anteproyecto inicial del proyecto. |
+| [`docs/er-diagram.pdf`](docs/er-diagram.pdf) | Esquema entidad-relación de la base de datos. |
+| [`docs/manual-uso.md`](docs/manual-uso.md) | Tutorial básico de uso de la aplicación. |
+| [`docs/bitacora.md`](docs/bitacora.md) | Diario de tareas realizadas durante el desarrollo. |
+| [`docs/bibliografia.md`](docs/bibliografia.md) | Enlaces y documentación técnica consultada. |
+| [`docs/justificacion-tecnologias.md`](docs/justificacion-tecnologias.md) | Justificación del cambio de tecnologías y equivalencias. |
+| [`docs/diseno-interfaces.md`](docs/diseno-interfaces.md) | Explicación breve del diseño, identidad visual y responsive. |
+
+> La documentación específica del despliegue se añadirá cuando se realice el despliegue definitivo en AWS, ya que deberá incluir IP, dominio, HTTPS, capturas y comandos reales.
+
+---
+
 ## Esquema E/R
 
-El esquema entidad-relación de la base de datos se encuentra en:
+El esquema entidad-relación se encuentra en:
 
 - [`docs/er-diagram.pdf`](docs/er-diagram.pdf)
 
@@ -164,7 +194,7 @@ Entidades principales:
 - `User`: representa usuarios, participantes, líderes, coordinadores y administradores.
 - `Team`: representa equipos del hackatón.
 - `Pick`: representa selecciones realizadas durante el draft.
-- `SystemState`: representa el estado global del sistema, especialmente si el draft está abierto o pausado.
+- `SystemState`: representa el estado global del sistema.
 
 ---
 
@@ -236,9 +266,9 @@ http://localhost:5146/swagger
 
 - Autenticación mediante JWT.
 - Token almacenado en `sessionStorage`.
-- Rutas privadas en frontend mediante componentes protegidos.
+- Rutas privadas en frontend.
 - Endpoints protegidos en backend mediante `[Authorize]`.
-- Restricción por roles mediante `[Authorize(Roles = "Admin")]`, `[Authorize(Roles = "Admin,Coordinator")]`, etc.
+- Restricción por roles mediante `[Authorize(Roles = "...")]`.
 - Validaciones en backend para proteger la integridad de datos.
 
 La seguridad principal se aplica en el backend. El frontend adapta la navegación y visibilidad de acciones según el rol del usuario autenticado.
@@ -249,7 +279,7 @@ La seguridad principal se aplica en el backend. El frontend adapta la navegació
 
 La aplicación valida datos tanto en frontend como en backend.
 
-Ejemplos de validaciones implementadas:
+Ejemplos:
 
 - Campos obligatorios en registro e inicio de sesión.
 - Confirmación de contraseña.
@@ -264,7 +294,9 @@ Ejemplos de validaciones implementadas:
 
 ## Almacenamiento de archivos
 
-Las fotos de usuario se gestionan desde el backend mediante `PhotoService` y se almacenan en `wwwroot`. La aplicación permite:
+Las fotos de usuario se gestionan desde el backend mediante `PhotoService` y se almacenan en `wwwroot`.
+
+La aplicación permite:
 
 - Subir foto durante el registro.
 - Cambiar foto de perfil.
@@ -310,33 +342,13 @@ Swagger:  http://localhost:5146/swagger
 
 ---
 
-## Tutorial breve de uso
+## Manual de uso
 
-> Las capturas de pantalla o material multimedia deberán añadirse en `docs/` cuando estén preparadas.
+El tutorial básico de uso de la aplicación se encuentra en:
 
-### 1. Registro o inicio de sesión
+- [`docs/manual-uso.md`](docs/manual-uso.md)
 
-El usuario accede a la pantalla inicial y puede iniciar sesión o registrarse. Durante el registro se solicitan datos personales, foto, estudios, habilidades y, si procede, configuración como líder.
-
-### 2. Acceso a la aplicación
-
-Tras autenticarse, el usuario accede a la interfaz principal. La navegación disponible depende del rol asociado.
-
-### 3. Gestión administrativa
-
-Los usuarios con rol `Admin` o `Coordinator` pueden acceder a las vistas de gestión para consultar usuarios, equipos, coordinadores, estado del draft e historial de selecciones.
-
-### 4. Apertura del draft
-
-Desde el área de sistema se puede abrir o pausar el draft. Cuando el draft está abierto, los líderes pueden seleccionar participantes.
-
-### 5. Selección de participantes
-
-El líder consulta la lista de participantes disponibles, puede buscar u ordenar por habilidades y seleccionar a una persona para incorporarla a su equipo.
-
-### 6. Historial y display
-
-Cada selección queda registrada en el historial. La aplicación incluye una vista pública pensada para mostrar la última selección activa durante el evento.
+Pendiente de añadir capturas finales cuando la interfaz y el despliegue estén cerrados.
 
 ---
 
@@ -362,27 +374,24 @@ Pendiente de añadir tras despliegue
 
 ## Diseño de la aplicación
 
-El diseño visual se ha desarrollado de forma iterativa durante la implementación de la aplicación, adaptándose a cambios funcionales y a las necesidades reales del proyecto.
+La explicación breve del diseño se encuentra en:
 
-Decisiones principales:
+- [`docs/diseno-interfaces.md`](docs/diseno-interfaces.md)
 
-- Interfaz responsive con enfoque mobile-first.
+Resumen:
+
+- Diseño responsive con enfoque mobile-first.
+- CSS propio sin frameworks.
 - Uso de colores corporativos de Diverxia Consulting.
-- Uso del logotipo/SVG oficial de Diverxia, respetando la identidad visual de la empresa.
+- Uso del logotipo/SVG oficial de Diverxia.
+- Diseño ajustado de forma iterativa durante el desarrollo.
 - Componentes reutilizables para tarjetas, modales, acciones y vistas principales.
-- Priorización de una interfaz funcional real frente a un prototipo estático cerrado.
-
-URL de diseño o capturas pendientes:
-
-```txt
-Pendiente de añadir si procede
-```
 
 ---
 
 ## Despliegue
 
-El despliegue académico está previsto en AWS para cumplir los requisitos del módulo de Despliegue de Aplicaciones Web.
+El despliegue académico está pendiente de realizar en AWS.
 
 Arquitectura prevista:
 
@@ -396,7 +405,7 @@ Nginx en EC2
         MySQL en EC2
 ```
 
-Requisitos a cubrir:
+Requisitos a cubrir cuando se disponga de acceso a AWS:
 
 - Instancia EC2.
 - Elastic IP.
@@ -406,30 +415,19 @@ Requisitos a cubrir:
 - Frontend React compilado.
 - MySQL configurado.
 - HTTPS mediante Certbot / Let’s Encrypt.
+- URL pública de la aplicación.
+- URL pública de la landing page.
+- Capturas y comandos del proceso.
 
-URL pendiente:
-
-```txt
-Pendiente de añadir tras despliegue en AWS
-```
+La documentación específica del despliegue se añadirá más adelante, cuando el despliegue sea real y verificable.
 
 ---
 
-## Bitácora de tareas
+## Bitácora
 
-| Fecha | Responsable | Tarea realizada |
-|---|---|---|
-| 2026-03-18 | David Andrino Ferrera | Definición inicial del proyecto, nombre, temática y estructura base del repositorio. |
-| 2026-03-20 | David Andrino Ferrera | Inicio del backend con ASP.NET Core, entidades principales, DbContext y migraciones iniciales. |
-| 2026-03-21 | David Andrino Ferrera | Implementación de autenticación, registro, JWT, gestión de fotos y reestructuración de entidades. |
-| 2026-03-24 | David Andrino Ferrera | Desarrollo de funcionalidades de equipos, picks, draft, administración y sistema. |
-| 2026-03-26 | David Andrino Ferrera | Pruebas funcionales del backend y revisión de endpoints principales. |
-| 2026-04-30 | David Andrino Ferrera | Inicio del frontend con React, Vite, TypeScript, routing y estructura visual base. |
-| 2026-05-12 | David Andrino Ferrera | Desarrollo de componentes reutilizables, tarjetas de usuario, perfiles, equipos y vistas principales. |
-| 2026-05-17 | David Andrino Ferrera | Revisión de formato, Prettier y organización del código frontend. |
-| 2026-05-21 | David Andrino Ferrera | Optimización de estilos CSS y ajustes responsive. |
-| 2026-05-28 | David Andrino Ferrera | Revisión global de requisitos por módulos, detección de pendientes y planificación de documentación/despliegue. |
-| 2026-06-04 | David Andrino Ferrera | Ampliación del README y documentación general del proyecto. |
+La bitácora completa se encuentra en:
+
+- [`docs/bitacora.md`](docs/bitacora.md)
 
 ---
 
@@ -461,21 +459,11 @@ Pendiente de añadir URL
 
 ---
 
-## Bibliografía y documentación de apoyo
+## Bibliografía
 
-- Documentación oficial de ASP.NET Core: https://learn.microsoft.com/aspnet/core
-- Documentación oficial de Entity Framework Core: https://learn.microsoft.com/ef/core
-- Documentación oficial de MySQL: https://dev.mysql.com/doc/
-- Documentación de Pomelo.EntityFrameworkCore.MySql: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql
-- Documentación oficial de React: https://react.dev/
-- Documentación oficial de Vite: https://vite.dev/
-- Documentación de React Router: https://reactrouter.com/
-- Documentación de TypeScript: https://www.typescriptlang.org/docs/
-- Documentación de Swagger/OpenAPI: https://swagger.io/docs/
-- Documentación de JWT: https://jwt.io/introduction
-- Documentación de AWS EC2: https://docs.aws.amazon.com/ec2/
-- Documentación de Nginx: https://nginx.org/en/docs/
-- Documentación de Certbot: https://certbot.eff.org/
+La bibliografía y documentación técnica consultada se encuentra en:
+
+- [`docs/bibliografia.md`](docs/bibliografia.md)
 
 ---
 
@@ -502,6 +490,7 @@ Pendiente de añadir URL
 - Interfaz responsive.
 - CSS propio sin frameworks.
 - Swagger/OpenAPI.
+- Documentación base del proyecto.
 
 ### Pendiente
 
@@ -519,6 +508,7 @@ Pendiente de añadir URL
 
 ---
 
-## Notas sobre mantenimiento
+## Autor
 
-El proyecto se mantiene como una base única durante el desarrollo. Para la entrega académica se prevé realizar un despliegue temporal en AWS. Posteriormente, si la aplicación se mantiene para uso de la empresa, se podrá crear una rama o repositorio específico orientado a un despliegue estable y gratuito o de bajo coste.
+David Andrino Ferrera  
+Proyecto Integrado - Desarrollo de Aplicaciones Web

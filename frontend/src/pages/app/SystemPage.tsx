@@ -16,9 +16,22 @@ import SystemActionCard from "../../components/system/SystemActionCard";
 import SystemDraftStatusCard from "../../components/system/SystemDraftStatusCard";
 import UndoPickConfirmationModal from "../../components/system/UndoPickConfirmationModal";
 import { useAnimatedModalClose } from "../../hooks/useAnimatedModalClose";
+import type { PagedResult } from "../../types/paginationTypes";
 import type { PickHistoryItem } from "../../types/pickHistoryTypes";
 import type { SystemStatus } from "../../types/systemTypes";
 import { getStoredUser, getToken } from "../../utils/authStorage";
+
+const PICKS_PAGE_SIZE = 10;
+
+const emptyPicksPage: PagedResult<PickHistoryItem> = {
+  items: [],
+  page: 1,
+  pageSize: PICKS_PAGE_SIZE,
+  totalItems: 0,
+  totalPages: 0,
+  hasPreviousPage: false,
+  hasNextPage: false,
+};
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -42,7 +55,9 @@ function SystemPage() {
   const currentUser = getStoredUser();
 
   const [status, setStatus] = useState<SystemStatus | null>(null);
-  const [picks, setPicks] = useState<PickHistoryItem[]>([]);
+  const [picksPage, setPicksPage] =
+    useState<PagedResult<PickHistoryItem>>(emptyPicksPage);
+  const [picksPageNumber, setPicksPageNumber] = useState(1);
 
   const [isPickHistoryOpen, setIsPickHistoryOpen] = useState(false);
   const [isOrganizersOpen, setIsOrganizersOpen] = useState(false);
@@ -122,7 +137,7 @@ function SystemPage() {
     }
   }
 
-  async function loadPicks() {
+  async function loadPicks(pageValue = picksPageNumber) {
     if (!token) {
       setError("Sesión no válida.");
       setIsLoadingPicks(false);
@@ -133,8 +148,13 @@ function SystemPage() {
     setIsLoadingPicks(true);
 
     try {
-      const data = await getPicksHistory(token);
-      setPicks(data);
+      const data = await getPicksHistory(token, {
+        page: pageValue,
+        pageSize: PICKS_PAGE_SIZE,
+      });
+
+      setPicksPage(data);
+      setPicksPageNumber(data.page || 1);
       setHasLoadedPicks(true);
     } catch (apiError) {
       console.error(apiError);
@@ -149,7 +169,8 @@ function SystemPage() {
     setIsPickHistoryOpen(true);
 
     if (!hasLoadedPicks) {
-      await loadPicks();
+      setPicksPageNumber(1);
+      await loadPicks(1);
     }
   }
 
@@ -273,7 +294,7 @@ function SystemPage() {
     try {
       await undoPick(token, pickToUndo.pickId);
       setPickToUndo(null);
-      await loadPicks();
+      await loadPicks(picksPageNumber);
     } catch (apiError) {
       console.error(apiError);
       setError(
@@ -303,7 +324,8 @@ function SystemPage() {
       closePickDisplay();
       setPickToUndo(null);
 
-      setPicks([]);
+      setPicksPage(emptyPicksPage);
+      setPicksPageNumber(1);
       setHasLoadedPicks(false);
 
       await loadStatus();
@@ -397,11 +419,12 @@ function SystemPage() {
       <PickHistoryModal
         isOpen={isPickHistoryOpen}
         isClosing={isPickHistoryClosing}
-        picks={picks}
+        picksPage={picksPage}
         isLoading={isLoadingPicks}
         undoingPickId={undoingPickId}
         onClose={closePickHistoryWithAnimation}
-        onRefresh={() => void loadPicks()}
+        onRefresh={() => void loadPicks(picksPageNumber)}
+        onPageChange={(nextPage) => void loadPicks(nextPage)}
         onRequestUndo={requestUndoPick}
         formatDateTime={formatDateTime}
         getPickUserName={getPickUserName}

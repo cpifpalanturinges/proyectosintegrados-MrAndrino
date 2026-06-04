@@ -2,7 +2,9 @@ import { apiRequest } from "./apiClient";
 import type {
   AdminUserDetail,
   AdminUserListItem,
+  UserRoleFilter,
 } from "../types/adminUserTypes";
+import type { PagedResult } from "../types/paginationTypes";
 
 export type UpdateUserRequest = {
   firstName: string;
@@ -18,14 +20,37 @@ export type UpdateUserPasswordRequest = {
   newPassword: string;
 };
 
-export function getAdminUsers(token: string, search?: string) {
-  const query = search?.trim();
+export function getAdminUsers(
+  token: string,
+  options: {
+    search?: string;
+    role?: UserRoleFilter;
+    page?: number;
+    pageSize?: number;
+  } = {},
+) {
+  const params = new URLSearchParams();
 
-  const endpoint = query
-    ? `/api/admin/users?search=${encodeURIComponent(query)}`
-    : "/api/admin/users";
+  if (options.search?.trim()) {
+    params.set("search", options.search.trim());
+  }
 
-  return apiRequest<AdminUserListItem[]>(endpoint, {
+  if (options.role && options.role !== "all") {
+    params.set("role", options.role);
+  }
+
+  if (options.page) {
+    params.set("page", String(options.page));
+  }
+
+  if (options.pageSize) {
+    params.set("pageSize", String(options.pageSize));
+  }
+
+  const query = params.toString();
+  const endpoint = query ? `/api/admin/users?${query}` : "/api/admin/users";
+
+  return apiRequest<PagedResult<AdminUserListItem>>(endpoint, {
     token,
   });
 }

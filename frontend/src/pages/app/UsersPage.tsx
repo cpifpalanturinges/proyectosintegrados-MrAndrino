@@ -1,62 +1,63 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAdminUserById, getAdminUsers } from "../../api/adminUserApi";
-import UserCard from "../../components/users/UserCard";
 import UserProfileModal from "../../components/profile/UserProfileModal";
+import PaginationControls from "../../components/PaginationControls";
+import UserCard from "../../components/users/UserCard";
 import type {
   AdminUserDetail,
   AdminUserListItem,
   UserRoleFilter,
 } from "../../types/adminUserTypes";
+import type { PagedResult } from "../../types/paginationTypes";
 import { getToken } from "../../utils/authStorage";
 
-function getUserFullName(
-  user: Pick<AdminUserListItem, "firstName" | "lastName">,
-) {
-  return `${user.firstName} ${user.lastName}`.trim().toLocaleLowerCase("es");
-}
+const USERS_PAGE_SIZE = 12;
+
+const emptyUsersPage: PagedResult<AdminUserListItem> = {
+  items: [],
+  page: 1,
+  pageSize: USERS_PAGE_SIZE,
+  totalItems: 0,
+  totalPages: 0,
+  hasPreviousPage: false,
+  hasNextPage: false,
+};
 
 function UsersPage() {
   const token = getToken();
 
-  const [users, setUsers] = useState<AdminUserListItem[]>([]);
+  const [usersPage, setUsersPage] =
+    useState<PagedResult<AdminUserListItem>>(emptyUsersPage);
   const [selectedUser, setSelectedUser] = useState<AdminUserDetail | null>(
     null,
   );
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRoleFilter>("all");
+  const [page, setPage] = useState(1);
 
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [error, setError] = useState("");
 
-  const filteredUsers = useMemo(() => {
-    const usersByRole =
-      roleFilter === "all"
-        ? users
-        : users.filter((user) => user.role === roleFilter);
-
-    return [...usersByRole].sort((firstUser, secondUser) =>
-      getUserFullName(firstUser).localeCompare(
-        getUserFullName(secondUser),
-        "es",
-        {
-          sensitivity: "base",
-        },
-      ),
-    );
-  }, [users, roleFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [search, roleFilter]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      loadUsers(search);
+      loadUsers(search, roleFilter, page);
     }, 300);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [search]);
+  }, [search, roleFilter, page]);
 
-  async function loadUsers(searchValue: string) {
+  async function loadUsers(
+    searchValue: string,
+    roleValue: UserRoleFilter,
+    pageValue: number,
+  ) {
     if (!token) {
       setError("Sesión no válida.");
       setIsLoadingUsers(false);
@@ -67,8 +68,14 @@ function UsersPage() {
     setIsLoadingUsers(true);
 
     try {
-      const data = await getAdminUsers(token, searchValue);
-      setUsers(data);
+      const data = await getAdminUsers(token, {
+        search: searchValue,
+        role: roleValue,
+        page: pageValue,
+        pageSize: USERS_PAGE_SIZE,
+      });
+
+      setUsersPage(data);
     } catch (apiError) {
       console.error(apiError);
       setError("No se han podido cargar los usuarios.");
@@ -100,17 +107,22 @@ function UsersPage() {
       return;
     }
 
-    const [updatedUser, updatedUsers] = await Promise.all([
+    const [updatedUser, updatedUsersPage] = await Promise.all([
       getAdminUserById(userId, token),
-      getAdminUsers(token, search),
+      getAdminUsers(token, {
+        search,
+        role: roleFilter,
+        page,
+        pageSize: USERS_PAGE_SIZE,
+      }),
     ]);
 
     setSelectedUser(updatedUser);
-    setUsers(updatedUsers);
+    setUsersPage(updatedUsersPage);
   }
 
   async function handleUserDeleted() {
-    await loadUsers(search);
+    await loadUsers(search, roleFilter, page);
     setSelectedUser(null);
   }
 
@@ -172,23 +184,31 @@ function UsersPage() {
 
         {isLoadingUsers ? (
           <p className="app-muted">Cargando usuarios...</p>
-        ) : filteredUsers.length === 0 ? (
+        ) : usersPage.items.length === 0 ? (
           <p className="app-muted">
             No hay usuarios que coincidan con la búsqueda.
           </p>
         ) : (
-          <div className="users-grid">
-            {filteredUsers.map((user) => (
-              <UserCard
-                key={user.userId}
-                user={user}
-                showRole
-                showSkills={false}
-                clickable
-                onClick={() => handleSelectUser(user.userId)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="users-grid">
+              {usersPage.items.map((user) => (
+                <UserCard
+                  key={user.userId}
+                  user={user}
+                  showRole
+                  showSkills={false}
+                  clickable
+                  onClick={() => handleSelectUser(user.userId)}
+                />
+              ))}
+            </div>
+
+            <PaginationControls
+              pagination={usersPage}
+              isLoading={isLoadingUsers}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
 

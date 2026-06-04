@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamDraft.Api.Data;
 using TeamDraft.Api.DTOs.Admin;
+using TeamDraft.Api.DTOs.Common;
 using TeamDraft.Api.DTOs.System;
 using TeamDraft.Api.Entities;
 using TeamDraft.Api.Services.Interfaces;
@@ -61,9 +62,9 @@ public class AdminSystemController : ControllerBase
     }
 
     [HttpGet("picks")]
-    public async Task<ActionResult<List<PickHistoryItemDto>>> GetPicksHistory()
+    public async Task<ActionResult<PagedResultDto<PickHistoryItemDto>>> GetPicksHistory([FromQuery] PickHistoryQueryDto query)
     {
-        var picks = await _context.Picks
+        var picksQuery = _context.Picks
             .Include(p => p.Team)
             .Include(p => p.User)
             .OrderByDescending(p => p.CreatedAt)
@@ -80,8 +81,9 @@ public class AdminSystemController : ControllerBase
                 PickOrder = p.PickOrder,
                 CreatedAt = p.CreatedAt,
                 IsCancelled = p.IsCancelled
-            })
-            .ToListAsync();
+            });
+
+        var picks = await picksQuery.ToPagedResultAsync(query.Page, query.PageSize);
 
         return Ok(picks);
     }
