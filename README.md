@@ -15,7 +15,7 @@ La aplicación cuenta con una zona de gestión protegida por roles y una API RES
 | Ciclo | Desarrollo de Aplicaciones Web |
 | Empresa vinculada | Diverxia Consulting |
 | Repositorio | Repositorio privado de GitHub con acceso para el profesorado |
-| Anteproyecto | [`ANTEPROYECTO.md`](ANTEPROYECTO.md) / enlace Notion pendiente de añadir |
+| Anteproyecto | [`ANTEPROYECTO.md`](ANTEPROYECTO.md) / [`Notion`](https://app.notion.com/p/Anteproyecto-3292e73c9ca1801ca3bee15c8fb083d2?v=1132e73c9ca18058a8dc000c85ec9c30&source=copy_link) |
 | Esquema E/R | [`docs/er-diagram.pdf`](docs/er-diagram.pdf) |
 | Aplicación desplegada | Pendiente de despliegue en AWS |
 | Landing page | Pendiente de implementación/despliegue |
