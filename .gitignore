@@ -63,3 +63,9 @@ coverage/
 
 # Uploaded user files
 backend/TeamDraft.Api/wwwroot/uploads/
+
+# Environment-specific settings / secrets
+appsettings.Development.json
+appsettings.Production.json
+**/appsettings.Development.json
+**/appsettings.Production.json
