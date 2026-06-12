@@ -171,16 +171,19 @@ Al cerrar sesión se elimina la información almacenada en el navegador y se vue
 
 ---
 
-## 13. Capturas pendientes
+## 13. Comprobaciones realizadas
 
-En la documentación final se pueden añadir capturas de:
+Durante las pruebas finales se comprobó el funcionamiento de los flujos principales de la aplicación:
 
-- Pantalla de login.
-- Pantalla de registro.
-- Vista principal.
-- Vista de selección.
-- Vista de equipos.
-- Vista de usuarios.
-- Vista de sistema.
-- Perfil de usuario.
-- Display público.
+- Acceso a la aplicación mediante HTTPS.
+- Registro de usuarios con foto de perfil.
+- Inicio de sesión.
+- Visualización de usuarios y equipos.
+- Carga correcta de imágenes de perfil.
+- Gestión del estado del draft.
+- Selección de participantes por parte de líderes.
+- Consulta del historial de picks.
+- Acceso al display público.
+- Cierre de sesión.
+
+Estas pruebas permiten validar que la aplicación funciona correctamente desde el despliegue realizado en AWS.

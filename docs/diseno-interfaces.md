@@ -101,7 +101,7 @@ El proyecto utiliza algunos recursos HTML5 y multimedia:
 - Canvas para capturar la imagen desde la cámara.
 - Animaciones y transiciones CSS.
 
-Como mejora pendiente, se puede añadir una landing page con audio y otros recursos multimedia para cubrir mejor los requisitos de la asignatura.
+Como decisión de alcance, se priorizó la aplicación funcional principal frente a una landing page independiente, ya que el objetivo era disponer de una herramienta operativa para gestionar el draft. La pantalla inicial de autenticación funciona como punto de entrada visual e incorpora identidad corporativa, recursos gráficos y comportamiento responsive.
 
 ---
 

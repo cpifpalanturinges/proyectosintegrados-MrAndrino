@@ -27,3 +27,8 @@
 | 28/05/2026 | Documentación básica de diseño de interfaces, identidad visual, responsive y metodología iterativa. | Interfaces |
 | 28/05/2026 | Ampliación del README según la normativa del proyecto integrado. | Proyecto Integrado |
 | 29/05/2026 | Preparación de documentación final y revisión de tareas pendientes antes del despliegue. | Proyecto Integrado |
+| 09/06/2026 | Creación de instancia EC2 en AWS Academy Learner Lab, asignación de Elastic IP y acceso por SSH. | Despliegue |
+| 09/06/2026 | Instalación y configuración de Nginx, MySQL, .NET, Node.js y publicación del backend ASP.NET Core. | Despliegue |
+| 09/06/2026 | Compilación del frontend React, configuración de Nginx como servidor web y reverse proxy hacia la API. | Despliegue |
+| 09/06/2026 | Configuración de DuckDNS, HTTPS con Certbot/Let’s Encrypt y pruebas finales de la aplicación desplegada. | Despliegue |
+| 12/06/2026 | Documentación final del despliegue con capturas y revisión de entrega. | Proyecto Integrado |
